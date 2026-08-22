@@ -2,7 +2,9 @@ import postgres from "postgres";
 import { describe, expect, it } from "vitest";
 
 describe("Supabase database runtime configuration", () => {
-  it("connects using the Vercel database contract or controlled local migration fallback", async () => {
+  const databaseIntegrationEnabled = process.env.RUN_DATABASE_INTEGRATION_TEST === "true";
+
+  it.runIf(databaseIntegrationEnabled)("connects using the Vercel database contract or controlled local migration fallback", async () => {
     // Vercel deployments use DATABASE_URL. The migration-only name remains as a
     // local test fallback while this managed project still injects it securely.
     const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;

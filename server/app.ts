@@ -1,13 +1,8 @@
 import express from "express";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { createContext } from "./context";
-import { hasServerConfiguration } from "./env";
+import { databaseHealthPayload, runtimeHealthPayload } from "./health";
 import { appRouter } from "./routers";
-
-function healthPayload() {
-  const configured = hasServerConfiguration();
-  return { configured, ok: configured, service: "mizan-al-jawda" };
-}
 
 /**
  * Builds the request handler shared by the local Node launcher and the Vercel
@@ -26,7 +21,12 @@ export function createApp() {
   });
 
   app.get(["/healthz", "/api/health"], (_, res) => {
-    const payload = healthPayload();
+    const payload = runtimeHealthPayload();
+    res.status(payload.ok ? 200 : 503).json(payload);
+  });
+
+  app.get("/api/health/database", async (_, res) => {
+    const payload = await databaseHealthPayload();
     res.status(payload.ok ? 200 : 503).json(payload);
   });
 

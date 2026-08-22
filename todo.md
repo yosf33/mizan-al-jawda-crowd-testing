@@ -37,7 +37,11 @@
 - [ ] Configure Vercel environment variables and Supabase Auth URL settings without exposing server secrets.
 - [x] Switch the Vercel production branch from `main` to the validated Supabase/Vercel migration branch and record the non-secret deployment evidence.
 - [x] Disable Vercel Authentication so the generated Vercel URL is publicly accessible for the approved closed-beta deployment.
-- [ ] Deploy and verify the publicly accessible Vercel Production URL from the approved public GitHub repository.
-- [ ] Diagnose and fix the live Vercel Function crash affecting `/api/health` before completing production validation.
+- [x] Deploy and verify the publicly accessible Vercel Production URL from the approved public GitHub repository.
+- [x] Diagnose and fix the live Vercel Function crash affecting `/api/health` before completing production validation.
+- [ ] Diagnose and fix the live Vercel routing failure that returns a platform 404 for nested `/api/trpc/*` paths.
+- [ ] Rotate exposed Supabase server credentials and the transaction-pooler database password, then securely update Vercel runtime variables.
+- [ ] Replace the invalidated local post-rotation database credential check with a safe production database health validation.
+- [ ] Revalidate Vercel runtime configuration and Supabase Auth URLs after credential rotation without recording secret values.
 - [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
 - [ ] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.
