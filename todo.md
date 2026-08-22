@@ -14,3 +14,42 @@
 - [x] Verify the responsive RTL experience and core workflows in the browser.
 - [x] Add a comprehensive README with setup, architecture, workflow, security, and deployment guidance.
 - [x] Create a private GitHub repository for the completed platform and transfer the project source.
+- [x] Create an application-owned migration branch and remove managed runtime dependencies from the portable codebase.
+- [x] Replace managed authentication with Supabase Auth using a closed-beta, invite-only configuration.
+- [x] Convert the schema and data layer from MySQL/TiDB to Supabase PostgreSQL with UUID identities and transaction-safe finance flows.
+- [x] Replace managed evidence storage with a private Supabase Storage bucket, signed access controls, and Free-tier evidence quotas.
+- [ ] Add database migrations, Row Level Security policies, seed fixtures, and restore documentation for Supabase.
+- [ ] Add Render deployment configuration, portable environment documentation, health check, security headers, and CI validation.
+- [ ] Execute local migration, security, financial, RTL, backup/restore, and portability validation tests.
+- [ ] Prepare a cloud rehearsal with Supabase and Render only after the portable codebase has passed all local acceptance gates.
+- [x] Rename the server-only Supabase configuration to SUPABASE_SECRET_KEY while accepting a legacy service-role variable for backward compatibility.
+- [x] Prepare an implementation-free Supabase and Vercel migration plan, including serverless conversion, configuration, validation, rollback, and free-tier guardrails.
+- [x] Review the approved Vercel migration plan and establish the Vercel implementation branch.
+- [x] Split the portable Express application into a Vercel Function handler and a local-development launcher.
+- [x] Add Vercel configuration for Vite static output, API routing, SPA deep links, security headers, and health checks.
+- [x] Exclude `/api/*` from the SPA fallback and verify Vercel Function route precedence with automated configuration coverage.
+- [x] Standardize database validation on `DATABASE_URL` while retaining a temporary local migration fallback only where necessary.
+- [x] Prefer the PostgreSQL `DATABASE_URL` in Vercel while ignoring the managed local MySQL value in favor of the controlled Supabase fallback.
+- [x] Apply the same PostgreSQL database-URL selection contract to Drizzle tooling and validate it independently.
+- [ ] Add and execute a Vercel CLI build validation without exposing deployment secrets.
+- [x] Replace obsolete Render deployment guidance with the Vercel serverless deployment contract and free-tier operating guardrails.
+- [x] Replace the remaining Render reference in Supabase connection guidance and re-scan deployment documentation.
+- [ ] Complete a clean provider-side Vercel and Supabase configuration audit after the earlier exposure-and-rotation incident, recording only non-secret confirmation.
+- [x] Switch the Vercel production branch from `main` to the validated Supabase/Vercel migration branch and record the non-secret deployment evidence.
+- [x] Disable Vercel Authentication so the generated Vercel URL is publicly accessible for the approved closed-beta deployment.
+- [x] Deploy and verify the publicly accessible Vercel Production URL from the approved public GitHub repository.
+- [x] Diagnose and fix the live Vercel Function crash affecting `/api/health` before completing production validation.
+- [x] Diagnose and fix the live Vercel routing failure that returns a platform 404 for nested `/api/trpc/*` paths.
+- [x] Rotate exposed Supabase server credentials and the transaction-pooler database password, then securely update Vercel runtime variables.
+- [x] Replace the invalidated local post-rotation database credential check with a safe production database health validation.
+- [x] Add an explicit nested Vercel Function entrypoint for `/api/health/database` so the data-free production database probe is routable.
+- [x] Fix the mobile RTL sign-in layout so its form card remains fully visible without horizontal clipping.
+- [ ] Validate a real Supabase sign-in and redirect roundtrip on the public Vercel URL after credential rotation, recording only non-secret evidence.
+- [x] Enable Supabase email/password authentication for the closed beta and verify the sign-in configuration without retaining user credentials.
+- [x] Use the authorized Supabase command-line integration for all supported configuration and validation actions, reserving the browser for dashboard-only controls.
+- [ ] Add and validate an explicit Arabic logout control on the authenticated onboarding route so unprovisioned closed-beta users can end a session without creating workflow records.
+- [x] Fix the mobile RTL onboarding unauthenticated-state card overflow observed at the 375px viewport and add a regression assertion.
+- [ ] Validate authenticated role workflows using a dedicated temporary test account, then remove that account and its test data with non-secret evidence.
+- [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
+- [x] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.
+- [x] Add missing covering indexes for the Supabase performance-advisor findings on bug-report and reputation-event foreign keys, then rerun the advisor check.
