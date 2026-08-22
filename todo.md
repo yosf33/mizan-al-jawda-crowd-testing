@@ -35,6 +35,7 @@
 - [x] Replace obsolete Render deployment guidance with the Vercel serverless deployment contract and free-tier operating guardrails.
 - [x] Replace the remaining Render reference in Supabase connection guidance and re-scan deployment documentation.
 - [ ] Configure Vercel environment variables and Supabase Auth URL settings without exposing server secrets.
+- [ ] Switch the Vercel production branch from `main` to the validated Supabase/Vercel migration branch and record the non-secret deployment evidence.
 - [ ] Deploy and verify a Vercel preview from the private GitHub repository.
 - [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
 - [ ] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.
