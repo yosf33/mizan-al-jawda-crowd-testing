@@ -6,6 +6,7 @@
 dist/
 build/
 *.dist
+api/vercel-handler.js
 
 # Environment variables
 .env
