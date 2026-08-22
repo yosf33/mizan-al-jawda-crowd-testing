@@ -61,3 +61,17 @@ A purpose-made temporary account successfully signed in through the public Verce
 Vercel Production deployment `Frgk1HRPDm6bqb7s82wFo1CUcUaf` for commit `98a4a71` reached **Ready** in 54 seconds from the `migration/supabase-vercel-free-tier` branch. The stable public alias remains `https://mizan-al-jawda-crowd-testing.vercel.app/`; no custom domain was added and the existing Manus deployment remains unchanged. Public endpoint checks, authenticated logout validation, and temporary-user cleanup will be recorded only after this exact deployment is tested.
 
 On that deployment, public `GET /`, `GET /sign-in`, `GET /api/health`, and `GET /api/health/database` returned HTTP 200. The unauthenticated `account.profile` tRPC boundary returned the intended HTTP 401 response, and the documented CSP, HSTS, `nosniff`, frame-denial, and referrer-policy headers were present. The temporary closed-beta user signed in successfully, reached the onboarding gate without submitting it, and selected the new Arabic logout action, which redirected to `/sign-in`. The user therefore has no tester/client workspace data or workflow records; deletion of the temporary Auth account, whose profile cascades on deletion, is the final cleanup action.
+
+## Staging environment setup
+
+An isolated Supabase staging project was created in the same Frankfurt region as Production after the provider-reported zero-cost confirmation. A dedicated `staging` Git branch generated a distinct Vercel Preview deployment. The existing public Production branch, production Supabase project, Production-scoped variables, custom domains, and Manus deployment remain unchanged.
+
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are both restricted to the Vercel **Preview** environment and the dedicated `staging` branch. The Vercel variable inventory confirms that the existing `DATABASE_URL`, `SUPABASE_SECRET_KEY`, `SUPABASE_URL`, and `SUPABASE_PUBLISHABLE_KEY` entries remain **Production**-scoped. A post-entry scope inspection showed only the two client-side `VITE_` staging overrides, so the server-only staging overrides require one further confirmation before deployment. Their values are intentionally omitted. Remaining staging work consists of completing branch-scoped server variable configuration, closed-beta Auth configuration, and isolated runtime validation.
+
+The first additional Preview-only server-variable form was prepared with the `SUPABASE_URL` name only. The user entered its value directly in Vercel, and the resulting row was verified by name and scope only as **Preview → staging**. No value was inspected, retained, exposed, or deployed.
+
+The `SUPABASE_PUBLISHABLE_KEY` server entry was likewise saved and verified by name and scope only as **Preview → staging**. Production-scoped rows remain separate; no value was inspected or retained.
+
+The `SUPABASE_SECRET_KEY` server entry was saved with the Sensitive control enabled and verified by name and scope only as **Preview → staging**. Its value was not inspected or retained.
+
+The final `DATABASE_URL` server entry was saved with the Sensitive control enabled and verified by name and scope only as **Preview → staging**. The staging Preview inventory now has the four expected client/runtime pairs (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`) plus server-only `SUPABASE_SECRET_KEY` and `DATABASE_URL`; all Production rows remain separate. No variable value was inspected, retained, or documented.
