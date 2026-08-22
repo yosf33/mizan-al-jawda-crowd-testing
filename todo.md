@@ -42,6 +42,7 @@
 - [ ] Diagnose and fix the live Vercel routing failure that returns a platform 404 for nested `/api/trpc/*` paths.
 - [ ] Rotate exposed Supabase server credentials and the transaction-pooler database password, then securely update Vercel runtime variables.
 - [ ] Replace the invalidated local post-rotation database credential check with a safe production database health validation.
+- [ ] Add an explicit nested Vercel Function entrypoint for `/api/health/database` so the data-free production database probe is routable.
 - [ ] Revalidate Vercel runtime configuration and Supabase Auth URLs after credential rotation without recording secret values.
 - [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
 - [ ] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.
