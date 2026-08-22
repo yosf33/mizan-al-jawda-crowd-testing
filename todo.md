@@ -53,3 +53,9 @@
 - [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
 - [x] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.
 - [x] Add missing covering indexes for the Supabase performance-advisor findings on bug-report and reputation-event foreign keys, then rerun the advisor check.
+- [x] Prepare a no-change staging-environment plan covering branch flow, isolated Supabase resources, Vercel Preview configuration, validation gates, and rollback controls while preserving current production.
+- [x] Confirm a second Supabase Free-tier project slot and capture the non-secret production baseline before staging provisioning.
+- [ ] Create an isolated Supabase staging project without copying production data, then apply the reviewed schema migrations and verify RLS, Storage, and advisors.
+- [ ] Create a `staging` Git branch and configure its Vercel Preview deployment with Preview-scoped staging variables only.
+- [ ] Configure closed-beta staging Auth with the exact Preview URL, confirmation retained, and self-service signup disabled.
+- [ ] Validate staging isolation, health endpoints, authentication boundaries, and non-secret deployment evidence without changing Production, domains, or Manus.
