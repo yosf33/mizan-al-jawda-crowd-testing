@@ -75,3 +75,15 @@ The `SUPABASE_PUBLISHABLE_KEY` server entry was likewise saved and verified by n
 The `SUPABASE_SECRET_KEY` server entry was saved with the Sensitive control enabled and verified by name and scope only as **Preview → staging**. Its value was not inspected or retained.
 
 The final `DATABASE_URL` server entry was saved with the Sensitive control enabled and verified by name and scope only as **Preview → staging**. The staging Preview inventory now has the four expected client/runtime pairs (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`) plus server-only `SUPABASE_SECRET_KEY` and `DATABASE_URL`; all Production rows remain separate. No variable value was inspected, retained, or documented.
+
+The isolated `staging` branch deployment (`26203a9`) completed as a Vercel Preview in 52 seconds. The stable branch preview is `https://mizan-al-jawda-crowd-testing-git-staging-youssef-soliman.vercel.app/`; the staging Supabase project still had only its default localhost Site URL and no redirect URLs before the next configuration step. Production deployment settings, domains, and Auth settings were not changed.
+
+The staging Supabase Auth Site URL was updated to the stable staging Preview URL. The redirect-URL dialog is now prepared to add that same exact URL; no wildcard or Production URL is being introduced.
+
+The exact stable staging Preview URL was submitted as the sole staging Auth redirect allow-list entry. The next step is to refresh and verify persistence, then to retain the closed-beta provider controls independently of Production.
+
+The staging Auth URL configuration now shows the stable staging Preview URL as both Site URL and the only redirect URL. In staging providers, Email is enabled, Confirm email is enabled, manual linking and anonymous sign-ins are disabled, and self-service signup was switched off pending save. These checks were performed only against the isolated staging project.
+
+The staging provider page was independently inspected after the attempted save. Its Save changes button was disabled, indicating no unsaved provider changes. The page markup confirms self-service signup, manual linking, and anonymous sign-ins are unchecked, while Confirm email is checked; the Email provider is shown as enabled. The staging closed-beta provider state is therefore persisted.
+
+The staging Auth URL configuration was refreshed and confirms that the exact stable staging Preview URL is configured as the Site URL and the sole redirect allow-list entry. No wildcard, Production URL, or custom domain entry was added to staging Auth.
