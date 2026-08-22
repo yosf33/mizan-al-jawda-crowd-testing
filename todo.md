@@ -14,3 +14,27 @@
 - [x] Verify the responsive RTL experience and core workflows in the browser.
 - [x] Add a comprehensive README with setup, architecture, workflow, security, and deployment guidance.
 - [x] Create a private GitHub repository for the completed platform and transfer the project source.
+- [ ] Create an application-owned migration branch and remove managed runtime dependencies from the portable codebase.
+- [ ] Replace managed authentication with Supabase Auth using a closed-beta, invite-only configuration.
+- [ ] Convert the schema and data layer from MySQL/TiDB to Supabase PostgreSQL with UUID identities and transaction-safe finance flows.
+- [ ] Replace managed evidence storage with a private Supabase Storage bucket, signed access controls, and Free-tier evidence quotas.
+- [ ] Add database migrations, Row Level Security policies, seed fixtures, and restore documentation for Supabase.
+- [ ] Add Render deployment configuration, portable environment documentation, health check, security headers, and CI validation.
+- [ ] Execute local migration, security, financial, RTL, backup/restore, and portability validation tests.
+- [ ] Prepare a cloud rehearsal with Supabase and Render only after the portable codebase has passed all local acceptance gates.
+- [x] Rename the server-only Supabase configuration to SUPABASE_SECRET_KEY while accepting a legacy service-role variable for backward compatibility.
+- [x] Prepare an implementation-free Supabase and Vercel migration plan, including serverless conversion, configuration, validation, rollback, and free-tier guardrails.
+- [x] Review the approved Vercel migration plan and establish the Vercel implementation branch.
+- [x] Split the portable Express application into a Vercel Function handler and a local-development launcher.
+- [x] Add Vercel configuration for Vite static output, API routing, SPA deep links, security headers, and health checks.
+- [x] Exclude `/api/*` from the SPA fallback and verify Vercel Function route precedence with automated configuration coverage.
+- [x] Standardize database validation on `DATABASE_URL` while retaining a temporary local migration fallback only where necessary.
+- [x] Prefer the PostgreSQL `DATABASE_URL` in Vercel while ignoring the managed local MySQL value in favor of the controlled Supabase fallback.
+- [x] Apply the same PostgreSQL database-URL selection contract to Drizzle tooling and validate it independently.
+- [ ] Add and execute a Vercel CLI build validation without exposing deployment secrets.
+- [x] Replace obsolete Render deployment guidance with the Vercel serverless deployment contract and free-tier operating guardrails.
+- [x] Replace the remaining Render reference in Supabase connection guidance and re-scan deployment documentation.
+- [ ] Configure Vercel environment variables and Supabase Auth URL settings without exposing server secrets.
+- [ ] Deploy and verify a Vercel preview from the private GitHub repository.
+- [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
+- [ ] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.

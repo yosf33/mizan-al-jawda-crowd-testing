@@ -15,7 +15,7 @@ The public experience is designed with a sacred-geometry visual system: warm cre
 | Triage workflow | The exact actions **Approve**, **Request Changes**, and **Mark Duplicate**. Duplicate handling requires both the original report reference and a written reason. |
 | Financial controls | Separate pending and available wallet balances, immutable-style transaction entries, payout debits/reversals, and administrator payout processing. |
 | Reputation | Reputation events are issued when reports are approved or rejected, and aggregate tester scores are maintained. |
-| Evidence security | Evidence is stored through S3-compatible storage metadata and exposed only through authorization-checked signed URLs to the reporter, linked client, or administrator. |
+| Evidence security | Evidence is stored in a private Supabase Storage bucket and exposed only through authorization-checked signed URLs to the reporter, linked client, or administrator. |
 | Notifications | In-app notification records for bug decisions, triage updates, and payout processing. |
 
 ## Workflow
@@ -51,16 +51,26 @@ The server verifies that the selected device belongs to the tester, that the tes
 | Layer | Stack |
 |---|---|
 | Client | React 19, TypeScript, Tailwind CSS 4, shadcn/ui, React Hook Form, Zod, Wouter |
-| Server | Express 4, tRPC 11, Manus OAuth |
-| Data | MySQL/TiDB via Drizzle ORM |
-| Storage | S3-compatible object storage with signed download URLs |
+| Server | Express 4, tRPC 11, Supabase Auth JWT verification |
+| Data | Supabase PostgreSQL via Drizzle ORM and the transaction pooler |
+| Storage | Private Supabase Storage bucket with signed download URLs |
 | Tests | Vitest |
 
 ## Local setup
 
 ### Prerequisites
 
-Use Node.js 22+ and `pnpm`. The application requires the runtime variables supplied by the Manus full-stack template, particularly `DATABASE_URL`, OAuth settings, and storage credentials.
+Use Node.js 22+ and `pnpm`. Copy `.env.example` to `.env` and set the required Supabase and public-application values. Keep all secrets out of browser variables and source control.
+
+| Variable | Where it is used | Visibility |
+|---|---|---|
+| `SUPABASE_URL` | Server Supabase client | Server only |
+| `SUPABASE_SECRET_KEY` | Storage operations and protected server actions | Server only |
+| `DATABASE_URL` | PostgreSQL transaction-pooler connection | Server only |
+| `SUPABASE_PUBLISHABLE_KEY` | Server-side JWT validation fallback | Server only |
+| `VITE_SUPABASE_URL` | Browser Supabase client | Public browser configuration |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser Supabase client | Public browser configuration |
+| `PUBLIC_APP_URL` | Optional future redirect and allowed-origin configuration | Server only |
 
 ### Install and run
 
@@ -69,15 +79,14 @@ pnpm install
 pnpm dev
 ```
 
-The development server starts the full Express and Vite application.
+The development server starts the standalone Express and Vite application. Its deployment health endpoint is [`/healthz`](http://localhost:3000/healthz).
 
 ### Database migrations
 
-The source schema is in `drizzle/schema.ts`. Generate migrations after a schema update, inspect the generated SQL, and apply it to the configured database:
+The application-owned migration history is in `supabase/migrations/`. Apply migrations to the target Supabase project in order and keep the generated database schema, RLS policies, private evidence bucket, and migration files in sync.
 
 ```bash
-pnpm drizzle-kit generate
-# Apply the reviewed migration through the managed database workflow.
+# Inspect and apply the next reviewed SQL file through Supabase migration tooling.
 ```
 
 ### Quality checks
@@ -86,6 +95,7 @@ pnpm drizzle-kit generate
 pnpm check
 pnpm test
 pnpm build
+pnpm run vercel:build
 ```
 
 ## Repository structure
@@ -94,8 +104,10 @@ pnpm build
 client/                 React RTL user interface
   src/pages/            Landing, onboarding, and role-specific workspaces
   src/components/       Shared dashboard and UI components
-server/                 tRPC procedures, security rules, storage integration
-drizzle/                Schema and generated database migrations
+server/                 Standalone Express server, tRPC procedures, Supabase auth and storage integration
+api/[...path].ts        Vercel Function entry point for `/api/*`
+supabase/migrations/    Application-owned PostgreSQL schema, storage, and RLS migrations
+vercel.json             Static SPA output, API routing, security headers, and deep-link fallback
 shared/                 Shared types and application constants
 ```
 
@@ -112,8 +124,14 @@ The platform enforces the following rules at the server boundary rather than rel
 
 ## Deployment
 
-The project is designed for the managed Manus full-stack runtime. Create a validated checkpoint, then use the product interface’s **Publish** control to deploy. Do not commit environment files, credentials, or production database URLs to this repository.
+Deploy the repository to Vercel as a Vite static build plus a Node.js Function under `/api/*`. In Vercel Project Settings, configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `DATABASE_URL` as server-only values and `VITE_SUPABASE_URL` plus `VITE_SUPABASE_PUBLISHABLE_KEY` as browser-safe build values for both **Preview** and **Production**. `DATABASE_URL` must use the Supabase transaction pooler and be URI encoded. Do not configure the migration-only `SUPABASE_DATABASE_URL` variable in Vercel.
+
+The Vercel build command is `pnpm run vercel-build`, with the static output in `dist/public`. The Vercel Function exposes `/api/health` and `/api/trpc`, while the route configuration preserves those API paths and sends non-API deep links such as `/workspace` to the RTL SPA entry page. Verify the generated Vercel URL before configuring it as the exact Supabase Auth Site URL and production redirect URL; do not attach or switch a custom domain without separate written approval.
+
+For a Supabase Free-tier MVP, keep the product invitation-only, enforce evidence upload-size limits, and monitor Storage, database, egress, function duration, and failed authentication activity. Vercel’s Hobby plan is appropriate for a private, non-commercial rehearsal; use a Vercel plan appropriate to commercial operation before onboarding paying clients or paying testers. The application is stateless and reconnects through Supabase’s transaction pooler. See the [Vercel Hobby plan documentation](https://vercel.com/docs/plans/hobby) and [Supabase Free plan limits](https://supabase.com/pricing).
+
+Do not commit `.env` files, database URIs, Supabase Secret API keys, or production credentials to this repository. See `docs/portable-runtime-configuration.md` and `supabase/README.md` for the deployment and migration sequence.
 
 ## Status
 
-The project currently includes the full MVP workflow, a production build, TypeScript checks, and automated tests for authentication, financial formatting, role authorization, rejection-reason validation, duplicate-validation requirements, and bug-category validation.
+The project currently includes the full MVP workflow, Supabase PostgreSQL schema and default-deny RLS migrations, Vercel Function and SPA configuration, a production build, TypeScript checks, and automated tests for authentication, Supabase credential and database connectivity, Vercel routing, financial formatting, role authorization, rejection-reason validation, duplicate-validation requirements, and bug-category validation. A live Vercel deployment and its acceptance evidence remain pending.
