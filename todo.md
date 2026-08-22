@@ -60,3 +60,4 @@
 - [x] Configure closed-beta staging Auth with the exact Preview URL, confirmation retained, and self-service signup disabled.
 - [x] Save and independently verify persisted staging provider switch states for Email enabled, Confirm email enabled, and self-service signup disabled.
 - [x] Validate staging isolation, health endpoints, authentication boundaries, and non-secret deployment evidence without changing Production, domains, or Manus.
+- [x] Review and publish the completed non-secret staging environment updates to the approved GitHub `staging` branch without merging to Production.
