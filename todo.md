@@ -63,3 +63,12 @@
 - [x] Review and publish the completed non-secret staging environment updates to the approved GitHub `staging` branch without merging to Production.
 - [x] Validate the open staging pull requests and close only user-approved obsolete requests without merging or changing Production; no open requests were present.
 - [x] Verify the current Production browser-side Supabase configuration after the reported sign-in error; the issue was not reproducible, required entries and bundle configuration are present, and no Production change was made.
+- [ ] Reproduce the persistent Production sign-in configuration error in the user’s connected browser and identify the exact deployed runtime cause before changing Production.
+- [ ] Review the referenced crowd-testing bug report, reproduce confirmed defects in staging, fix them with regression coverage, and seek approval before any Production release.
+- [x] Fix workspace auth and onboarding-state transitions so no authenticated or anonymous user receives a blank workspace.
+- [x] Make sidebar hash navigation scroll to the visible target and mark the active workspace destination.
+- [x] Add accessible policy destinations for privacy, terms, and evidence handling from the public footer.
+- [x] Add no-cycle and zero-balance workflow guardrails, modal descriptions, and accessible evidence-upload naming.
+- [x] Localize known Arabic authentication errors and payout-method labels consistently.
+- [x] Add focused automated regression coverage for the confirmed public, routing, and form-guardrail defects.
+- [ ] Run authenticated staging acceptance checks with purpose-made fixtures before recommending any Production release.

@@ -24,6 +24,7 @@ import {
 import { startLogin } from "@/const";
 import { Bell, LogOut, PanelRight, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
@@ -44,6 +45,25 @@ export default function DashboardLayout({
 }) {
   const { loading, user, logout } = useAuth();
   const [location, setLocation] = useLocation();
+  const locationHash = location.includes("#") ? location.split("#")[1] : "";
+
+  useEffect(() => {
+    if (!locationHash) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(locationHash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [locationHash]);
+
+  const navigateTo = (path: string) => {
+    setLocation(path);
+    const hash = path.includes("#") ? path.split("#")[1] : "";
+    if (hash) {
+      window.requestAnimationFrame(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  };
 
   if (loading) return <DashboardLayoutSkeleton />;
   if (!user) {
@@ -77,7 +97,7 @@ export default function DashboardLayout({
             <SidebarMenu>
               {navItems.map(item => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton isActive={location === item.path} onClick={() => setLocation(item.path)} className="h-11 rounded-xl px-3 data-[active=true]:bg-[#f5edd3] data-[active=true]:text-[#102a43]">
+                  <SidebarMenuButton isActive={location === item.path} onClick={() => navigateTo(item.path)} className="h-11 rounded-xl px-3 data-[active=true]:bg-[#f5edd3] data-[active=true]:text-[#102a43]">
                     <item.icon className="h-4 w-4" />
                     <span>{item.label}</span>
                   </SidebarMenuButton>

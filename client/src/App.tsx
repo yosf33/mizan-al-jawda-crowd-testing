@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Onboarding from "./pages/Onboarding";
+import Policies from "./pages/Policies";
 import SignIn from "./pages/SignIn";
 import Workspace from "./pages/Workspace";
 
@@ -14,6 +15,7 @@ function Router() {
     <Route path="/" component={Home} />
     <Route path="/sign-in" component={SignIn} />
     <Route path="/onboarding" component={Onboarding} />
+    <Route path="/policies" component={Policies} />
     <Route path="/workspace" component={Workspace} />
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
