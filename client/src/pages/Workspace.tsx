@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, Banknote, Bell, BriefcaseBusiness, CheckCircle2, CircleDollarSign, ClipboardCheck, FileWarning, FolderKanban, LayoutDashboard, Plus, ShieldCheck, Smartphone, TestTube2, UsersRound, WalletCards } from "lucide-react";
@@ -28,18 +29,27 @@ const roleMeta = {
 
 export default function Workspace() {
   const [, setLocation] = useLocation();
-  const profile = trpc.account.profile.useQuery();
-  const dashboard = trpc.workspace.dashboard.useQuery(undefined, { enabled: !!profile.data && profile.data.role !== "user" });
-  const notificationQuery = trpc.notifications.list.useQuery(undefined, { enabled: !!profile.data });
+  const { loading: authLoading, user } = useAuth();
+  const profile = trpc.account.profile.useQuery(undefined, { enabled: !authLoading && Boolean(user) });
+  const dashboard = trpc.workspace.dashboard.useQuery(undefined, { enabled: Boolean(profile.data && profile.data.role !== "user") });
+  const notificationQuery = trpc.notifications.list.useQuery(undefined, { enabled: Boolean(profile.data) });
   useEffect(() => {
-    if (!profile.isLoading && (!profile.data || profile.data.role === "user")) setLocation("/onboarding");
-  }, [profile.data, profile.isLoading, setLocation]);
-  if (profile.isLoading) return <div className="min-h-screen bg-[#f8f4e9]" />;
-  if (!profile.data || profile.data.role === "user") return null;
+    if (authLoading || !user || profile.isLoading) return;
+    if (!profile.data || profile.data.role === "user") setLocation("/onboarding");
+  }, [authLoading, profile.data, profile.isLoading, setLocation, user]);
+  if (authLoading || (Boolean(user) && profile.isLoading)) return <WorkspaceLoading />;
+  if (!user) return <WorkspaceAccessGate />;
+  if (profile.error) return <WorkspaceProfileError onRetry={() => void profile.refetch()} />;
+  if (!profile.data || profile.data.role === "user") return <OnboardingGate onContinue={() => setLocation("/onboarding")} />;
   const role = profile.data.role as keyof typeof roleMeta;
   const meta = roleMeta[role];
   return <DashboardLayout title={meta.title} roleLabel={meta.label} navItems={meta.nav as unknown as DashboardNavItem[]} notificationCount={notificationQuery.data?.filter(item => !item.readAt).length ?? 0}>{dashboard.isLoading ? <div className="grid gap-5 md:grid-cols-3"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div> : role === "tester" ? <TesterWorkspace data={dashboard.data as any} notifications={notificationQuery.data ?? []} /> : role === "client" ? <ClientWorkspace data={dashboard.data as any} notifications={notificationQuery.data ?? []} /> : <AdminWorkspace data={dashboard.data as any} notifications={notificationQuery.data ?? []} />}</DashboardLayout>;
 }
+
+function WorkspaceLoading() { return <main aria-busy="true" className="min-h-screen bg-[#f8f4e9] p-6"><div className="mx-auto max-w-6xl space-y-5"><SkeletonCard /><div className="grid gap-5 md:grid-cols-3"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div></div></main>; }
+function WorkspaceAccessGate() { return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#f8f4e9] p-6 text-right"><section className="surface-card w-full max-w-md p-8 text-center"><ShieldCheck className="mx-auto h-7 w-7 text-[#b8882e]" /><h1 className="mt-5 text-2xl font-bold text-[#102a43]">سجّل دخولك للمتابعة</h1><p className="mt-3 leading-7 text-[#58656f]">تحتاج إلى حساب موثّق للوصول إلى مساحة العمل وإدارة دورات الاختبار وتقارير الجودة.</p><Button className="mt-7 w-full bg-[#102a43] hover:bg-[#173a59]" onClick={() => window.location.assign("/sign-in")}>تسجيل الدخول</Button></section></main>; }
+function OnboardingGate({ onContinue }: { onContinue: () => void }) { return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#f8f4e9] p-6 text-right"><section className="surface-card w-full max-w-md p-8 text-center"><Smartphone className="mx-auto h-7 w-7 text-[#b8882e]" /><h1 className="mt-5 text-2xl font-bold text-[#102a43]">أكمل إعداد حسابك</h1><p className="mt-3 leading-7 text-[#58656f]">نحتاج معلومات الدور قبل فتح مساحة العمل المناسبة لك.</p><Button className="mt-7 w-full bg-[#102a43] hover:bg-[#173a59]" onClick={onContinue}>الانتقال إلى الإعداد</Button></section></main>; }
+function WorkspaceProfileError({ onRetry }: { onRetry: () => void }) { return <main dir="rtl" className="grid min-h-screen place-items-center bg-[#f8f4e9] p-6 text-right"><section className="surface-card w-full max-w-md p-8 text-center"><AlertTriangle className="mx-auto h-7 w-7 text-[#b64c3a]" /><h1 className="mt-5 text-2xl font-bold text-[#102a43]">تعذر تحميل مساحة العمل</h1><p className="mt-3 leading-7 text-[#58656f]">لم نتمكن من التحقق من حالة الحساب الآن. أعد المحاولة دون إعادة إدخال بياناتك.</p><Button className="mt-7 w-full bg-[#102a43] hover:bg-[#173a59]" onClick={onRetry}>إعادة المحاولة</Button></section></main>; }
 
 function TesterWorkspace({ data, notifications }: { data: any; notifications: any[] }) {
   const [reportOpen, setReportOpen] = useState(false); const [payoutOpen, setPayoutOpen] = useState(false);
