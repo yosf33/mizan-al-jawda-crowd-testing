@@ -1,0 +1,13 @@
+# Production sign-in configuration incident — 2026-08-23
+
+The user reported that the public Production `/sign-in` page displayed a validation message stating that browser-side Supabase configuration was incomplete. No credentials, variable values, user credentials, or account data were recorded.
+
+During the initial non-mutating check, the same public Production URL rendered the sign-in form without the reported configuration message. The authenticated Vercel Environment Variables dashboard was opened only to inspect variable metadata; it had not yet loaded the variable list at the time of this note, and no configuration was viewed, edited, or saved.
+
+The Vercel environment-variable metadata subsequently loaded without revealing any values. A refreshed list showed that the two required browser variables, `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, do in fact have Production entries, as well as the separate Preview `staging` entries. Production also has server-side `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `DATABASE_URL` entries. The initial list view was incomplete while the dashboard was loading; it must not be treated as evidence that the Production entries were absent.
+
+Because the public `/sign-in` page now renders without the configuration message and the required Production variable entries are present, no environment-variable change should be made at this time. The remaining safe check is to determine which Production deployment served the reported failure and whether it predates the current variable configuration, without revealing variable values. No Production, staging, domain, Supabase, Manus, or GitHub setting has been changed during this investigation.
+
+The Vercel deployment list shows the active Production deployment from commit `98a4a71` as Ready, while the staging documentation deployments remain Preview-only. The two Production browser-variable entries are visible in the refreshed environment-variable list. No deployment was triggered, and an unused variable-entry form was closed without saving.
+
+The current public Production browser bundle was checked without printing its contents or any values. It contains the configured Production Supabase URL and a publishable-key-shaped value, while the observed `sb_secret_` match is only the literal prefix inside a validation/error string and has no payload. No PostgreSQL URI match was present. The current bundle therefore has the required public browser configuration and does not show evidence of a server secret or database connection URI being exposed through that scan.

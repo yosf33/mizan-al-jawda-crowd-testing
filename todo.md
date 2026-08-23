@@ -61,3 +61,5 @@
 - [x] Save and independently verify persisted staging provider switch states for Email enabled, Confirm email enabled, and self-service signup disabled.
 - [x] Validate staging isolation, health endpoints, authentication boundaries, and non-secret deployment evidence without changing Production, domains, or Manus.
 - [x] Review and publish the completed non-secret staging environment updates to the approved GitHub `staging` branch without merging to Production.
+- [x] Validate the open staging pull requests and close only user-approved obsolete requests without merging or changing Production; no open requests were present.
+- [x] Verify the current Production browser-side Supabase configuration after the reported sign-in error; the issue was not reproducible, required entries and bundle configuration are present, and no Production change was made.
