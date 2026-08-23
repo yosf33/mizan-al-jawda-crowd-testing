@@ -72,3 +72,10 @@
 - [x] Localize known Arabic authentication errors and payout-method labels consistently.
 - [x] Add focused automated regression coverage for the confirmed public, routing, and form-guardrail defects.
 - [ ] Run authenticated staging acceptance checks with purpose-made fixtures before recommending any Production release.
+- [x] Inspect the existing Supabase Auth flow and staging confirmation settings for the requested signup feature.
+- [x] Implement an Arabic email-and-password signup flow with confirmation, safe error handling, and accessible validation states on the staging branch.
+- [ ] Add signup regression coverage and validate the staging confirmation redirect before any Production recommendation.
+- [ ] Enable staging self-service signup only after explicit approval, while retaining email confirmation and disabled anonymous/manual-linking controls.
+- [ ] Validate a purpose-made staging signup, email-confirmation redirect, sign-in, and onboarding entry without retaining credentials or test data beyond explicit authorization.
+- [ ] Enable self-service signup in both staging and Production Supabase Auth environments while retaining email confirmation and disabled anonymous/manual-linking controls.
+- [ ] Publish the signup interface to the staging and Production branches only after branch-specific validation and user-approved release controls.

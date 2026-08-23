@@ -8,12 +8,14 @@ import Home from "./pages/Home";
 import Onboarding from "./pages/Onboarding";
 import Policies from "./pages/Policies";
 import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 import Workspace from "./pages/Workspace";
 
 function Router() {
   return <Switch>
     <Route path="/" component={Home} />
     <Route path="/sign-in" component={SignIn} />
+    <Route path="/sign-up" component={SignUp} />
     <Route path="/onboarding" component={Onboarding} />
     <Route path="/policies" component={Policies} />
     <Route path="/workspace" component={Workspace} />

@@ -32,7 +32,7 @@ const steps = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const goOnboard = () => setLocation("/onboarding");
+  const goOnboard = () => setLocation("/sign-up");
 
   return (
     <main dir="rtl" className="min-h-screen overflow-hidden bg-[#f8f4e9] text-[#102a43]">
