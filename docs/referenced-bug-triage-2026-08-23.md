@@ -41,6 +41,10 @@ The current implementation has been updated on the staging worktree. These chang
 
 The automated suite completed with **27 passing tests and 1 intentional opt-in database integration skip**. The production build completed successfully. The client bundle remains above Vite's 500 kB advisory threshold, which is pre-existing performance debt and not treated as a release-blocking test failure in this pass.
 
+The reviewed remediation was published to GitHub `staging` as commit `518b672`. Vercel created a Preview deployment for that exact commit and reported it **Ready** in 54 seconds. The stable staging branch URL remains `https://mizan-al-jawda-crowd-testing-git-staging-youssef-soliman.vercel.app/`. This confirms deployment readiness only; the authenticated acceptance limits below remain in force.
+
+Public staging validation after deployment confirmed that `/workspace` renders the intended Arabic sign-in gate for an anonymous visitor rather than a blank workspace. The deployed `/policies#privacy` route also rendered its privacy, terms, and evidence content. No account credentials or state-changing workflow were used for these checks.
+
 ## Remaining acceptance gate
 
 Before a Production recommendation, create purpose-made staging-only tester, client, and admin fixtures with explicit user approval. Use them to validate role transitions, no-cycle and zero-balance server responses, evidence authorization, triage decisions, payout concurrency, direct RLS denial, and cleanup. No Production deployment is authorized by this document.
