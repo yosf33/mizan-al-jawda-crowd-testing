@@ -84,3 +84,4 @@
 - [x] Promote only the validated anonymous workspace gate and public policy-route fixes to Production, then revalidate both deployed routes.
 - [x] Compare GitHub branch heads and Vercel deployment commits to explain the apparent source-versus-deployment discrepancy without changing either system.
 - [x] Compare `main` with the current Production branch, synchronize main safely, resolve verified merge issues, and validate before updating the remote branch.
+- [x] Switch Vercel’s Production Branch from `migration/supabase-vercel-free-tier` to `main` and verify the mapping without changing the current live deployment.
