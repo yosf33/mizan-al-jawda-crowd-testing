@@ -77,5 +77,6 @@
 - [ ] Add signup regression coverage and validate the staging confirmation redirect before any Production recommendation.
 - [ ] Enable staging self-service signup only after explicit approval, while retaining email confirmation and disabled anonymous/manual-linking controls.
 - [ ] Validate a purpose-made staging signup, email-confirmation redirect, sign-in, and onboarding entry without retaining credentials or test data beyond explicit authorization.
-- [ ] Enable self-service signup in both staging and Production Supabase Auth environments while retaining email confirmation and disabled anonymous/manual-linking controls.
-- [ ] Publish the signup interface to the staging and Production branches only after branch-specific validation and user-approved release controls.
+- [x] Enable self-service signup in both staging and Production Supabase Auth environments while retaining email confirmation and disabled anonymous/manual-linking controls.
+- [x] Publish the signup interface to the staging and Production branches only after branch-specific validation and user-approved release controls.
+- [x] Promote the reviewed signup implementation from staging to `migration/supabase-vercel-free-tier` and verify the Vercel Production `/sign-up` route.
