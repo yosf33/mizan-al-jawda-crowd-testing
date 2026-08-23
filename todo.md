@@ -82,3 +82,4 @@
 - [x] Promote the reviewed signup implementation from staging to `migration/supabase-vercel-free-tier` and verify the Vercel Production `/sign-up` route.
 - [x] Reassess the referenced crowd-testing testing guidance against the current staging and Production releases, reproduce any new non-destructive defects, and fix only verified issues with regression coverage.
 - [x] Promote only the validated anonymous workspace gate and public policy-route fixes to Production, then revalidate both deployed routes.
+- [x] Compare GitHub branch heads and Vercel deployment commits to explain the apparent source-versus-deployment discrepancy without changing either system.
