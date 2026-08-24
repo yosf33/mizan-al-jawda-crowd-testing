@@ -5,7 +5,7 @@ import {
   bugAttachments, bugReportEvents, bugReports, cycleBountyRates, notifications, payoutRequests, profiles, reputationEvents,
   projects, testCycleApplications, testCycleInvitations, testCycleTtls, testerDevices, testerProfiles, testCycles, transactions, wallets,
 } from "../drizzle/schema";
-import { dashboardFor, isActiveCycleTtl, money, notify } from "./crowdtesting";
+import { dashboardFor, isActiveCycleTtl, money, notify, projectReportsWithHistory } from "./crowdtesting";
 import { getDb } from "./db";
 import { sendReviewEmail } from "./mail";
 import { storageGetSignedUrl, storagePut } from "./storage";
@@ -219,7 +219,10 @@ export const appRouter = router({
     pendingReports: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
       if (!(await isActiveCycleTtl(ctx.user.id, input.testCycleId))) fail("لست قائداً معيّناً لهذه الدورة.", "FORBIDDEN");
-      return dbOrFail().select().from(bugReports).where(and(eq(bugReports.testCycleId, input.testCycleId), eq(bugReports.status, "pending"))).orderBy(desc(bugReports.createdAt));
+      const db = dbOrFail();
+      const reports = await db.select().from(bugReports).where(and(eq(bugReports.testCycleId, input.testCycleId), eq(bugReports.status, "pending"))).orderBy(desc(bugReports.createdAt));
+      const events = reports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
+      return projectReportsWithHistory(reports, events);
     }),
     cycleApplications: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);

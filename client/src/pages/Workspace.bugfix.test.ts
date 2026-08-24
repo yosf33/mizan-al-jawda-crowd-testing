@@ -29,15 +29,31 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(page).toContain('id="report-evidence-help"');
   });
 
-  it("makes workspace hashes scrollable and policy destinations real routes", () => {
+  it("renders dedicated workspace sections for navigation and keeps policy destinations as real routes", () => {
     const layout = readProjectFile("client/src/components/DashboardLayout.tsx");
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
     const home = readProjectFile("client/src/pages/Home.tsx");
     const app = readProjectFile("client/src/App.tsx");
     expect(layout).toContain("scrollIntoView");
+    expect(page).toContain('path: "/workspace?section=reports"');
+    expect(page).toContain('path: "/workspace?section=wallet"');
+    expect(page).toContain('section === "reports"');
+    expect(page).toContain('section === "wallet"');
+    expect(page).toContain("TesterReportsView");
+    expect(page).toContain("TesterWalletView");
     expect(home).toContain('href="/policies#privacy"');
     expect(home).toContain('href="/policies#terms"');
     expect(home).toContain('href="/policies#evidence"');
     expect(app).toContain('path="/policies"');
+  });
+
+  it("renders the persisted saved-data and status-history affordances in authorized report records", () => {
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
+    expect(page).toContain("خطوات الإعادة");
+    expect(page).toContain("المتوقع");
+    expect(page).toContain("الفعلي");
+    expect(page).toContain("report.statusHistory");
+    expect(page).toContain("سجل الحالة");
   });
 
   it("localizes known Supabase authentication failures for Arabic users", () => {

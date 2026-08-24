@@ -49,3 +49,9 @@ Resend’s default onboarding sender is suitable only for account-owner testing.
 ## Navigation repair
 
 The tester workspace will move from unreliable hash-only menu behavior to explicit workspace sections backed by a section query parameter, while preserving `/workspace` as the overview. The reports view will render saved report details, status, and latest review feedback; the wallet view will render balance and payout controls directly.
+
+## Staging release record
+
+The V3 source, migration, tests, and this implementation record were committed to the isolated `staging` branch as `c751957` (`feat: add V3 test-cycle workflow controls`). Vercel created a Preview deployment for that commit. Its first dashboard observations showed it building; Production remained on its existing migration-branch deployment and was not changed.
+
+The Preview became Ready in 57 seconds at `https://mizan-al-jawda-crowd-testing-git-staging-youssef-soliman.vercel.app`. An initial read-only visit to `/workspace` showed the workspace loading skeleton; a follow-up check is required before judging the completed interface.

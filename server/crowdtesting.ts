@@ -30,6 +30,16 @@ export function money(value: string | number) {
   return Number(value).toFixed(2);
 }
 
+export function projectReportsWithHistory<T extends { id: string }, E extends { bugReportId: string }>(reports: T[], events: E[]) {
+  const eventsByReport = new Map<string, E[]>();
+  for (const event of events) {
+    const history = eventsByReport.get(event.bugReportId) ?? [];
+    history.push(event);
+    eventsByReport.set(event.bugReportId, history);
+  }
+  return reports.map(report => ({ ...report, statusHistory: eventsByReport.get(report.id) ?? [] }));
+}
+
 export async function notify(userId: string, title: string, body: string, entityType?: string, entityId?: string) {
   const db = getDb();
   if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
@@ -72,7 +82,8 @@ export async function dashboardFor(role: string, userId: string) {
       };
     });
     const reports = await db.select().from(bugReports).where(eq(bugReports.testerId, userId)).orderBy(desc(bugReports.createdAt)).limit(30);
-    return { kind: "tester" as const, profile, wallet, devices, activeCycles, reports };
+    const reportEvents = reports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
+    return { kind: "tester" as const, profile, wallet, devices, activeCycles, reports: projectReportsWithHistory(reports, reportEvents) };
   }
 
   if (role === "client") {
@@ -81,7 +92,8 @@ export async function dashboardFor(role: string, userId: string) {
     const cycles = projectIds.length ? await db.select().from(testCycles).where(inArray(testCycles.projectId, projectIds)).orderBy(desc(testCycles.createdAt)) : [];
     const cycleIds = cycles.map(cycle => cycle.id);
     const acceptedReports = cycleIds.length ? await db.select().from(bugReports).where(and(inArray(bugReports.testCycleId, cycleIds), eq(bugReports.status, "accepted"))).orderBy(desc(bugReports.createdAt)) : [];
-    return { kind: "client" as const, projects: ownedProjects, cycles, acceptedReports };
+    const reportEvents = acceptedReports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, acceptedReports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
+    return { kind: "client" as const, projects: ownedProjects, cycles, acceptedReports: projectReportsWithHistory(acceptedReports, reportEvents) };
   }
 
   if (role === "community_manager") {
