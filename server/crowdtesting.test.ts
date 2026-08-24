@@ -83,6 +83,21 @@ describe("V3 crowd-testing workflow guards", () => {
     await expect(caller.ttl.assignedCycles()).rejects.toThrow("ليس لديك الصلاحية");
   });
 
+  it("does not let a business owner apply to a test cycle as a tester", async () => {
+    const caller = appRouter.createCaller(contextFor("client"));
+    await expect(caller.tester.applyToCycle({ testCycleId: cycleId })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a tester invoke the Business Owner invitation flow", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.clientPortal.inviteTester({ testCycleId: cycleId, testerId: deviceId })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a Business Owner invoke the TTL application-decision route", async () => {
+    const caller = appRouter.createCaller(contextFor("client"));
+    await expect(caller.ttl.decideApplication({ applicationId: bugId, decision: "accepted" })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
   it("skips email delivery safely when no recipient is available", async () => {
     await expect(sendReviewEmail({ to: null, title: "تقرير تجريبي", outcome: "accepted" })).resolves.toEqual({ delivered: false, skipped: true });
   });

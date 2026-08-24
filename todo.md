@@ -86,7 +86,7 @@
 - [x] Compare `main` with the current Production branch, synchronize main safely, resolve verified merge issues, and validate before updating the remote branch.
 - [x] Switch Vercel’s Production Branch from `migration/supabase-vercel-free-tier` to `main` and verify the mapping without changing the current live deployment.
 - [x] Enforce server-side eligibility so testers may submit reports only after a test-cycle application has been accepted.
-- [ ] Add pending, accepted, and rejected bug-report statuses with a triage history that distinguishes a request for more information from a final decision.
+- [x] Add pending, accepted, and rejected bug-report statuses with a triage history that distinguishes a request for more information from a final decision.
 - [x] Add a securely assigned TTL (test-team lead) role, scoped to assigned test cycles, with report accept, reject, and information-request permissions.
 - [x] Add a server-enforced Community Manager role that alone can assign or revoke TTL membership without client-side role spoofing.
 - [x] Show Business Owners the accepted reports for their own test cycles only.
@@ -94,11 +94,16 @@
 - [x] Let the Business Owner or an assigned TTL accept or reject test-cycle applications with auditable server-side authorization.
 - [ ] Send a tester email after a report is accepted, rejected, or marked as requiring more information, without exposing credentials or message-provider secrets.
 - [x] Configure the email delivery provider through connected services without asking the user to paste API keys; request browser takeover only if the provider requires user-owned sign-in or sender verification.
-- [ ] Ensure persisted bug-report fields and status history render reliably in the tester and authorized owner/TTL views.
+- [x] Ensure persisted bug-report fields and status history render reliably in the tester and authorized owner/TTL views.
 - [x] Repair the tester-side تقاريري and المحفظة navigation so each menu item renders its intended section and action path.
-- [ ] Add automated regression coverage for the V3 authorization, status, application, invitation, notification-trigger, persistence, and navigation requirements.
+- [x] Add automated regression coverage for the V3 authorization, status, application, invitation, notification-trigger, persistence, and navigation requirements.
 - [ ] Verify arbitrary-recipient status-email delivery after a sender address or domain is verified for Resend Production use.
-- [ ] Redeploy the post-navigation-fix staging commit and verify in the browser that تقاريري and المحفظة render distinct V3 content and action paths.
-- [ ] Correct the deployed `?section=reports` section selection so تقاريري replaces the overview with its dedicated saved-report view.
-- [ ] Add fixture-backed validation that shows persisted report details and status history in tester, assigned TTL, and authorized Business Owner views.
-- [ ] Expand and document V3 regression coverage for populated report rendering and status-notification triggers, then rerun the full suite.
+- [x] Redeploy the post-navigation-fix staging commit and verify in the browser that تقاريري and المحفظة render distinct V3 content and action paths.
+- [x] Correct the deployed `?section=reports` section selection so تقاريري replaces the overview with its dedicated saved-report view.
+- [x] Add fixture-backed validation that shows persisted report details and status history in tester, assigned TTL, and authorized Business Owner views.
+- [x] Expand and document V3 regression coverage for populated report rendering and status-notification triggers, then rerun the full suite.
+- [x] Add explicit regression tests for test-cycle application and Business Owner/TTL invitation authorization, then rerun the full suite.
+- [x] Add fixture-backed server and UI regression coverage for populated persisted report fields and status history in tester, assigned TTL, and authorized Business Owner views.
+- [x] Add runtime tests that render populated report details and status history in tester, Business Owner, and assigned-TTL views.
+- [x] Add an interaction test for the actual tester "عرض البيانات المحفوظة" path and verify persisted fields and ordered status history without test-only props.
+- [x] Reapply the V3 validation record with the final populated-report and notification-trigger regression evidence.

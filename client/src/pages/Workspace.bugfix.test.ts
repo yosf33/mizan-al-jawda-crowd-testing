@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { buildReportPresentation } from "../lib/reportPresentation";
 
 const projectRoot = new URL("../../..", import.meta.url);
 const readProjectFile = (relativePath: string) => readFileSync(new URL(relativePath, projectRoot), "utf8");
@@ -51,11 +52,32 @@ describe("referenced crowd-testing regression fixes", () => {
 
   it("renders the persisted saved-data and status-history affordances in authorized report records", () => {
     const page = readProjectFile("client/src/pages/Workspace.tsx");
-    expect(page).toContain("خطوات الإعادة");
-    expect(page).toContain("المتوقع");
-    expect(page).toContain("الفعلي");
-    expect(page).toContain("report.statusHistory");
+    const presentation = readProjectFile("client/src/lib/reportPresentation.ts");
+    expect(page).toContain("buildReportPresentation(report)");
+    expect(presentation).toContain("خطوات الإعادة");
+    expect(presentation).toContain("المتوقع");
+    expect(presentation).toContain("الفعلي");
+    expect(presentation).toContain("statusHistory");
     expect(page).toContain("سجل الحالة");
+  });
+
+  it("preserves populated persisted report details and ordered status history for every authorized report surface", () => {
+    const presentation = buildReportPresentation({
+      title: "تعذر حفظ التغييرات",
+      stepsToReproduce: "افتح الإعدادات ثم احفظ التعديل",
+      expectedResult: "يتم حفظ التعديل",
+      actualResult: "تظهر رسالة تعذر الحفظ",
+      statusHistory: [
+        { id: "submitted", type: "submitted", createdAt: "2026-08-24T08:00:00.000Z" },
+        { id: "request", type: "information_requested", message: "أرفق لقطة شاشة", createdAt: "2026-08-24T09:00:00.000Z" },
+      ],
+    });
+    expect(presentation.details.map((item) => item.value)).toEqual(["افتح الإعدادات ثم احفظ التعديل", "يتم حفظ التعديل", "تظهر رسالة تعذر الحفظ"]);
+    expect(presentation.history.map((event) => [event.label, event.message])).toEqual([["تم إرسال التقرير", null], ["طُلبت معلومات إضافية", "أرفق لقطة شاشة"]]);
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
+    expect(page).toContain("<ReportRecord key={report.id} report={report} />");
+    expect(page).toContain("<ReportRecord key={report.id} report={report} showFull />");
+    expect(page).toContain("<ReportRecord report={report} showFull />");
   });
 
   it("localizes known Supabase authentication failures for Arabic users", () => {
