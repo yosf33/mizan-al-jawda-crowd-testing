@@ -131,3 +131,10 @@
 - [x] Remove generic tester and test-cycle onboarding actions from the signed-in home page while retaining the dedicated workspace action.
 - [x] Replace the generic "تغطية RTL أصلية" benefit with a more useful product-specific statement for signed-out visitors.
 - [x] Validate the revised signed-in home action hierarchy and benefits copy on staging.
+- [x] Audit GitHub branches, Vercel deployment configuration, and repository references to confirm whether the legacy migration branch is unused and staging is bound to `staging`.
+- [x] Delete the verified unused legacy migration branch only after explicit confirmation, with no Production configuration change.
+- [x] Audit source code, package scripts, Vercel configuration, environment-variable contracts, authentication, storage, database access, and static assets for any remaining Manus dependency.
+- [x] Replace any residual Manus runtime, authentication, storage, build, analytics, or hosting dependency with a Supabase, Vercel, or provider-neutral implementation on staging.
+- [x] Document the independent Supabase and Vercel deployment contract, including required non-secret provider configuration and recovery steps.
+- [x] Add portability regression coverage and validate a staging build and deployment path without Manus runtime services.
+- [ ] Request approval before changing Vercel/Supabase Production settings or declaring Production independent of Manus.

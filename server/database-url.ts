@@ -7,7 +7,7 @@ export function resolvePostgresDatabaseUrl(readEnvironment = (name: string) => p
     return configured;
   }
 
-  return readEnvironment("SUPABASE_DATABASE_URL");
+  return "";
 }
 
 export function requirePostgresDatabaseUrl(readEnvironment?: (name: string) => string) {

@@ -60,7 +60,7 @@ The server verifies that the selected device belongs to the tester, that the tes
 
 ### Prerequisites
 
-Use Node.js 22+ and `pnpm`. Copy `.env.example` to `.env` and set the required Supabase and public-application values. Keep all secrets out of browser variables and source control.
+Use Node.js 22+ and `pnpm`. Use [`docs/environment-template.md`](docs/environment-template.md) to create a local `.env` file with the required Supabase and public-application values. Keep all secrets out of browser variables and source control.
 
 | Variable | Where it is used | Visibility |
 |---|---|---|
@@ -124,13 +124,17 @@ The platform enforces the following rules at the server boundary rather than rel
 
 ## Deployment
 
-Deploy the repository to Vercel as a Vite static build plus a Node.js Function under `/api/*`. In Vercel Project Settings, configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `DATABASE_URL` as server-only values and `VITE_SUPABASE_URL` plus `VITE_SUPABASE_PUBLISHABLE_KEY` as browser-safe build values for both **Preview** and **Production**. `DATABASE_URL` must use the Supabase transaction pooler and be URI encoded. Do not configure the migration-only `SUPABASE_DATABASE_URL` variable in Vercel.
+Deploy the repository to Vercel as a Vite static build plus a Node.js Function under `/api/*`. In Vercel Project Settings, configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, and `DATABASE_URL` as server-only values and `VITE_SUPABASE_URL` plus `VITE_SUPABASE_PUBLISHABLE_KEY` as browser-safe build values for both **Preview** and **Production**. `DATABASE_URL` must use the Supabase transaction pooler and be URI encoded. Do not configure the retired migration-only database variable in Vercel.
 
 The Vercel build command is `pnpm run vercel-build`, with the static output in `dist/public`. The Vercel Function exposes `/api/health` and `/api/trpc`, while the route configuration preserves those API paths and sends non-API deep links such as `/workspace` to the RTL SPA entry page. Verify the generated Vercel URL before configuring it as the exact Supabase Auth Site URL and production redirect URL; do not attach or switch a custom domain without separate written approval.
 
 For a Supabase Free-tier MVP, keep the product invitation-only, enforce evidence upload-size limits, and monitor Storage, database, egress, function duration, and failed authentication activity. Vercel’s Hobby plan is appropriate for a private, non-commercial rehearsal; use a Vercel plan appropriate to commercial operation before onboarding paying clients or paying testers. The application is stateless and reconnects through Supabase’s transaction pooler. See the [Vercel Hobby plan documentation](https://vercel.com/docs/plans/hobby) and [Supabase Free plan limits](https://supabase.com/pricing).
 
 Do not commit `.env` files, database URIs, Supabase Secret API keys, or production credentials to this repository. See `docs/portable-runtime-configuration.md` and `supabase/README.md` for the deployment and migration sequence.
+
+### Independence from Manus
+
+The tracked application runtime is self-contained on **Vercel and Supabase**: Vercel hosts the SPA and Node Function, while Supabase provides Auth, PostgreSQL, and private evidence storage. No Manus API, storage proxy, OAuth endpoint, built-in analytics endpoint, or managed runtime is required by the active application path. See `docs/manus-independence-audit-2026-08-24.md` for the recorded audit and `docs/portable-runtime-configuration.md` for the portable deployment and recovery procedure.
 
 ## Status
 

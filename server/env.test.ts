@@ -13,19 +13,17 @@ afterEach(() => {
 describe("portable server environment", () => {
   it("uses a PostgreSQL DATABASE_URL supplied by Vercel", async () => {
     vi.stubEnv("DATABASE_URL", "postgresql://primary.example.test/postgres");
-    vi.stubEnv("SUPABASE_DATABASE_URL", "postgresql://fallback.example.test/postgres");
 
     const { env } = await loadEnvironment();
 
     expect(env.databaseUrl).toBe("postgresql://primary.example.test/postgres");
   });
 
-  it("uses the controlled Supabase fallback when the managed DATABASE_URL is not PostgreSQL", async () => {
-    vi.stubEnv("DATABASE_URL", "mysql://managed.example.test/platform");
-    vi.stubEnv("SUPABASE_DATABASE_URL", "postgresql://fallback.example.test/postgres");
+  it("rejects a non-PostgreSQL DATABASE_URL rather than using a provider fallback", async () => {
+    vi.stubEnv("DATABASE_URL", "mysql://unsupported.example.test/platform");
 
     const { env } = await loadEnvironment();
 
-    expect(env.databaseUrl).toBe("postgresql://fallback.example.test/postgres");
+    expect(env.databaseUrl).toBe("");
   });
 });

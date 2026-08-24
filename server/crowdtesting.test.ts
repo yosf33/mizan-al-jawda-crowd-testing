@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { appRouter } from "./routers";
 import { assertRole, money, projectReportsWithHistory } from "./crowdtesting";
 import { sendReviewEmail } from "./mail";
-import type { TrpcContext } from "./_core/context";
+import type { TrpcContext } from "./context";
 
 const cycleId = "00000000-0000-4000-8000-000000000001";
 const deviceId = "00000000-0000-4000-8000-000000000002";
