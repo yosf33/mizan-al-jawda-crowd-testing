@@ -124,3 +124,7 @@
 - [x] Add server regression tests for Community Manager payout confirmation, immutable payout-sent events, tester history, and Community Manager cross-tester visibility.
 - [x] Add role-specific rendered-view coverage for tester, assigned TTL, and owning Business Owner report-image evidence through the secure URL contract.
 - [x] Add focused UI regression coverage that overview pages exclude duplicated workflow details while dedicated workspace sections retain them.
+- [x] Keep the active sidebar navigation state synchronized with the currently selected workspace section.
+- [x] Correct Arabic typography metrics so letter dots and diacritics render with readable separation in headings and promotional copy.
+- [x] Design and implement a distinct authenticated home-page experience that visibly confirms sign-in and displays the current account email without exposing credentials.
+- [x] Add regression and visual checks for sidebar selection state, Arabic heading rendering, and the authenticated home-page state.

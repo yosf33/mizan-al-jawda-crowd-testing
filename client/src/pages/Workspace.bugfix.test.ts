@@ -127,4 +127,26 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(layout).toContain("item.title");
     expect(page).toContain('notificationCount={notifications.data?.filter((item) => !item.readAt).length ?? 0}');
   });
+
+  it("keeps the active sidebar state synchronized with query-string workspace sections", () => {
+    const layout = readProjectFile("client/src/components/DashboardLayout.tsx");
+    expect(layout).toContain('import { useLocation, useSearch } from "wouter"');
+    expect(layout).toContain("const search = useSearch()");
+    expect(layout).toContain("const normalizedSearch = search");
+    expect(layout).toContain("const activeLocation = normalizedSearch");
+    expect(layout).toContain("isActive={activeLocation === item.path}");
+  });
+
+  it("uses Arabic-safe display typography and gives signed-in users a distinct identified home state", () => {
+    const styles = readProjectFile("client/src/index.css");
+    const home = readProjectFile("client/src/pages/Home.tsx");
+    expect(styles).toContain("Noto Kufi Arabic");
+    expect(styles).toContain(".arabic-display");
+    expect(styles).toContain("letter-spacing: normal !important");
+    expect(styles).toContain("line-height: 1.32 !important");
+    expect(home).toContain("signed-in-identity");
+    expect(home).toContain("signed-in-home-card");
+    expect(home).toContain("{user.email}");
+    expect(home).toContain("حسابك نشط وجاهز للعمل");
+  });
 });

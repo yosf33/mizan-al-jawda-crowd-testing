@@ -25,7 +25,7 @@ import { startLogin } from "@/const";
 import { Bell, LogOut, PanelRight, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
 export type DashboardNavItem = { label: string; path: string; icon: LucideIcon };
@@ -47,7 +47,10 @@ export default function DashboardLayout({
 }) {
   const { loading, user, logout } = useAuth();
   const [location, setLocation] = useLocation();
+  const search = useSearch();
   const locationHash = location.includes("#") ? location.split("#")[1] : "";
+  const normalizedSearch = search ? (search.startsWith("?") ? search : `?${search}`) : "";
+  const activeLocation = normalizedSearch && !location.includes("?") ? `${location}${normalizedSearch}` : location;
 
   useEffect(() => {
     if (!locationHash) return;
@@ -99,7 +102,7 @@ export default function DashboardLayout({
             <SidebarMenu>
               {navItems.map(item => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton isActive={location === item.path} onClick={() => navigateTo(item.path)} className="h-11 rounded-xl px-3 data-[active=true]:bg-[#f5edd3] data-[active=true]:text-[#102a43]">
+                  <SidebarMenuButton isActive={activeLocation === item.path} onClick={() => navigateTo(item.path)} className="h-11 rounded-xl px-3 data-[active=true]:bg-[#f5edd3] data-[active=true]:text-[#102a43]">
                     <item.icon className="h-4 w-4" />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
