@@ -37,6 +37,8 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(layout).toContain("scrollIntoView");
     expect(page).toContain('path: "/workspace?section=reports"');
     expect(page).toContain('path: "/workspace?section=wallet"');
+    expect(page).toContain("useSearch");
+    expect(page).toContain("new URLSearchParams(search)");
     expect(page).toContain('section === "reports"');
     expect(page).toContain('section === "wallet"');
     expect(page).toContain("TesterReportsView");

@@ -55,3 +55,11 @@ The tester workspace will move from unreliable hash-only menu behavior to explic
 The V3 source, migration, tests, and this implementation record were committed to the isolated `staging` branch as `c751957` (`feat: add V3 test-cycle workflow controls`). Vercel created a Preview deployment for that commit. Its first dashboard observations showed it building; Production remained on its existing migration-branch deployment and was not changed.
 
 The Preview became Ready in 57 seconds at `https://mizan-al-jawda-crowd-testing-git-staging-youssef-soliman.vercel.app`. An initial read-only visit to `/workspace` showed the workspace loading skeleton; a follow-up check is required before judging the completed interface.
+
+The follow-up V3 commit `463a2e3` (`feat: implement V3 test cycle workflow`) was pushed to the isolated `staging` branch after 35 passing tests, one intentional opt-in database-test skip, and a successful production build. Vercel created a fresh staging Preview deployment for this commit; it was still building at the first dashboard check. Production remains unchanged.
+
+The second dashboard observation showed the same Preview continuing to build after approximately 90 seconds. Deployment logs must be checked if it does not transition to Ready.
+
+The deployment then reached **Ready** in 58 seconds at `https://mizan-al-jawda-crowd-testing-git-staging-youssef-soliman.vercel.app`, sourced from `staging` commit `463a2e3`. An authenticated, read-only workspace visit displayed the tester sidebar with the dedicated overview, reports, wallet, and test-lead entries; the initial content state was still loading, so the individual menu render checks remain pending. No user data was changed.
+
+After loading, the workspace showed the tester’s persisted dashboard data and an unaccepted test cycle. Selecting `تقاريري` changed the URL to `?section=reports`, but the rendered content still retained the overview sections. The menu’s query update works, but this staging check identified a remaining client-side section-render issue that must be corrected before completion. No state-changing control was used.

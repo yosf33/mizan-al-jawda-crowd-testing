@@ -13,7 +13,7 @@ import { AlertTriangle, Banknote, Bell, BriefcaseBusiness, CheckCircle2, CircleD
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { z } from "zod";
 
 const reportSchema = z.object({
@@ -37,11 +37,12 @@ const roleMeta: Record<"tester" | "client" | "community_manager" | "admin", { ti
 
 export default function Workspace() {
   const [location, setLocation] = useLocation();
+  const search = useSearch();
   const { loading: authLoading, user } = useAuth();
   const profile = trpc.account.profile.useQuery(undefined, { enabled: !authLoading && Boolean(user) });
   const dashboard = trpc.workspace.dashboard.useQuery(undefined, { enabled: Boolean(profile.data && profile.data.role !== "user") });
   const notifications = trpc.notifications.list.useQuery(undefined, { enabled: Boolean(profile.data) });
-  const section = new URLSearchParams(location.split("?")[1]?.split("#")[0] ?? "").get("section") ?? "overview";
+  const section = new URLSearchParams(search).get("section") ?? "overview";
 
   useEffect(() => {
     if (authLoading || !user || profile.isLoading) return;

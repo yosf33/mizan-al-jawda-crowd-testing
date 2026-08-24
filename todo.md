@@ -99,5 +99,6 @@
 - [ ] Add automated regression coverage for the V3 authorization, status, application, invitation, notification-trigger, persistence, and navigation requirements.
 - [ ] Verify arbitrary-recipient status-email delivery after a sender address or domain is verified for Resend Production use.
 - [ ] Redeploy the post-navigation-fix staging commit and verify in the browser that تقاريري and المحفظة render distinct V3 content and action paths.
+- [ ] Correct the deployed `?section=reports` section selection so تقاريري replaces the overview with its dedicated saved-report view.
 - [ ] Add fixture-backed validation that shows persisted report details and status history in tester, assigned TTL, and authorized Business Owner views.
 - [ ] Expand and document V3 regression coverage for populated report rendering and status-notification triggers, then rerun the full suite.
