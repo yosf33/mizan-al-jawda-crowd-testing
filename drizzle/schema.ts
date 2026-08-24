@@ -22,7 +22,7 @@ export const bugStatus = pgEnum("bug_status", ["pending", "accepted", "rejected"
 export const applicationStatus = pgEnum("application_status", ["pending", "accepted", "rejected"]);
 export const invitationStatus = pgEnum("invitation_status", ["pending", "applied", "expired"]);
 export const reportEventType = pgEnum("report_event_type", ["submitted", "information_requested", "accepted", "rejected"]);
-export const transactionType = pgEnum("transaction_type", ["bounty_pending", "bounty_released", "payout_debit", "payout_reversal"]);
+export const transactionType = pgEnum("transaction_type", ["bounty_pending", "bounty_released", "payout_debit", "payout_reversal", "payout_sent"]);
 export const payoutStatus = pgEnum("payout_status", ["pending", "processed", "rejected"]);
 export const notificationType = pgEnum("notification_type", ["bug_status", "payout", "system"]);
 

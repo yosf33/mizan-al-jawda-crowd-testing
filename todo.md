@@ -107,3 +107,20 @@
 - [x] Add runtime tests that render populated report details and status history in tester, Business Owner, and assigned-TTL views.
 - [x] Add an interaction test for the actual tester "عرض البيانات المحفوظة" path and verify persisted fields and ordered status history without test-only props.
 - [x] Reapply the V3 validation record with the final populated-report and notification-trigger regression evidence.
+- [x] Create the requested staging-only user account and assign the persisted Community Manager role without changing Production authentication or profile data.
+- [ ] Verify the staging account exists and has only the requested Community Manager role, without exposing credentials.
+- [ ] Reset the staging Community Manager account password through a secret-safe recovery flow and invalidate the exposed password.
+- [ ] Record non-secret staging account verification evidence after the credential reset without storing a password.
+- [x] Fix header-logo navigation so it returns to the public home page without unnecessarily discarding an active authenticated session.
+- [x] Fix Business Owner invitation recipient entry and server validation so eligible tester email addresses can be invited to a test cycle.
+- [x] Show each test-cycle applicant’s approved display name or email rather than the generic "مختبر" label.
+- [x] Render actionable in-app notification content in both the header bell and the dedicated notification workspace.
+- [x] Give an accepted tester a secure detail view for the accepted test cycle and its permitted reporting context.
+- [x] Hide the قيادة الاختبارات menu from users who are not assigned a TTL role or scoped TTL responsibility.
+- [x] Accept Arabic-Indic numerals in withdrawal amount input while preserving server-side monetary validation.
+- [x] Add staged payout-transfer tracking, Community Manager confirmation, tester transaction history, and Community Manager cross-tester transaction visibility with auditable events.
+- [x] Restore authorized report-image rendering for the reporter, assigned TTL, and owning Business Owner using secure evidence access paths.
+- [x] Simplify role-specific overview sections so detailed workflow data is shown in its dedicated Arabic workspace menu instead of duplicating the overview.
+- [x] Add server regression tests for Community Manager payout confirmation, immutable payout-sent events, tester history, and Community Manager cross-tester visibility.
+- [x] Add role-specific rendered-view coverage for tester, assigned TTL, and owning Business Owner report-image evidence through the secure URL contract.
+- [x] Add focused UI regression coverage that overview pages exclude duplicated workflow details while dedicated workspace sections retain them.

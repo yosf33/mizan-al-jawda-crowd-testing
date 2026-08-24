@@ -20,7 +20,7 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(page).toContain("acceptedCycles.length");
     expect(page).toContain("لا توجد دورة مقبولة");
     expect(page).toContain("لا يوجد رصيد قابل للسحب حالياً");
-    expect(page).toContain("Number(amount) <= available");
+    expect(page).toContain("normalizedAmount <= available");
   });
 
   it("adds dialog descriptions and a named evidence upload control", () => {
@@ -85,5 +85,46 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(page).toContain("localizeAuthError");
     expect(page).toContain("بيانات تسجيل الدخول غير صحيحة.");
     expect(page).toContain("تعذر تسجيل الدخول. تحقق من البيانات وحاول مرة أخرى.");
+  });
+
+  it("keeps a signed-in user on an authenticated route after using the public product logo", () => {
+    const home = readProjectFile("client/src/pages/Home.tsx");
+    expect(home).toContain('import { useAuth } from "@/hooks/useAuth"');
+    expect(home).toContain('const { user } = useAuth()');
+    expect(home).toContain('user ? "/workspace" : "/sign-up"');
+    expect(home).toContain('user ? setLocation("/workspace") : startLogin()');
+  });
+
+  it("limits test-lead navigation to an active server-projected TTL assignment", () => {
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
+    expect(page).toContain('role === "tester" && !ttlAssignments.data?.length');
+    expect(page).toContain('item.path !== "/workspace?section=ttl"');
+  });
+
+  it("accepts Arabic numerals for withdrawals and exposes lifecycle and transaction history surfaces", () => {
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
+    expect(page).toContain("normalizeArabicDigits");
+    expect(page).toContain("payoutHistory");
+    expect(page).toContain("transactionsHistory");
+    expect(page).toContain("CommunityPayoutReview");
+    expect(page).toContain("تم تأكيد إرسال التحويل وسُجلت العملية");
+  });
+
+  it("uses the secure evidence URL contract and displays applicant identity and invitation email fields", () => {
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
+    const server = readProjectFile("server/routers.ts");
+    expect(page).toContain("ReportAttachment");
+    expect(page).toContain("trpc.evidence.getSecureUrl.useQuery");
+    expect(page).toContain("application.testerName || application.testerEmail");
+    expect(page).toContain("testerEmail");
+    expect(server).toContain("testerEmail: profiles.email");
+  });
+
+  it("renders actual notification content in both the workspace and the shared dashboard bell", () => {
+    const layout = readProjectFile("client/src/components/DashboardLayout.tsx");
+    const page = readProjectFile("client/src/pages/Workspace.tsx");
+    expect(layout).toContain("notifications");
+    expect(layout).toContain("item.title");
+    expect(page).toContain('notificationCount={notifications.data?.filter((item) => !item.readAt).length ?? 0}');
   });
 });

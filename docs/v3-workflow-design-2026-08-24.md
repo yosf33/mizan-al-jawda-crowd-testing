@@ -79,3 +79,26 @@ The staging browser checks were deliberately read-only. They did not create an a
 The regression suite was then expanded with fixture-backed application and invitation authorization checks, a report-presentation helper tested with persisted field and status-history fixtures, and assertions that the tester, authorized Business Owner, and assigned TTL views all use the same report record component. A real browser-like interaction test now clicks the shipped tester **عرض البيانات المحفوظة** control and verifies the persisted steps, expected result, actual result, ordered status history, and review note—without a test-only display override. The actual Business Owner and assigned-TTL report surfaces are rendered with the same populated fixture. The resulting full suite passed **43 tests**, with **one intentional opt-in database test skipped**, and the production build passed. This validates the shared server projection and UI presentation contract without creating or altering staging business data.
 
 The final implementation-and-test staging commit `d4d6b38` deployed successfully to Vercel as a **Ready Preview** in 58 seconds. It is sourced from `staging` and is available through the staging branch preview URL. The Vercel dashboard continued to show Production separately on its existing deployment; no Production deployment, Production environment variable, domain, or data was changed during V3 validation.
+
+## Staging workflow and workspace update
+
+The following update is scoped to the isolated `staging` branch and staging Supabase project. It does not promote code, data, mail configuration, or authentication changes to Production.
+
+| Area | Implemented staging behavior |
+| --- | --- |
+| Public navigation | The product logo returns to the public home route, whose header and calls to action now recognize an existing authenticated session rather than prompting that user to sign in again. |
+| Invitations and applicants | Business Owners can invite a completed tester by email. Applicant panels prefer the account display name and fall back to the persisted email address, instead of the generic tester label. |
+| Notifications | The header bell renders the same actionable in-app notification feed as the dedicated notification area. |
+| Test-cycle access and TTL navigation | Accepted testers receive a cycle-detail view containing their permitted reporting context. The `قيادة الاختبارات` navigation entry is hidden unless the tester has an active per-cycle TTL assignment. |
+| Withdrawals and transfer audit | Arabic-Indic and Persian digits are normalized in the withdrawal amount field before the existing server-side monetary validation. A pending request stays pending until a Community Manager confirms sending; confirmation creates a `payout_sent` transaction event, updates the request, and notifies the tester. |
+| Transaction views | A tester’s payout and transaction history remains scoped to that tester’s wallet. Community Managers receive a named, cross-tester audit view and a pending-transfer confirmation queue. |
+| Report evidence | The reporter, assigned TTL, and owning Business Owner receive the existing server-enforced signed evidence URL contract; image evidence is rendered as an image while non-image evidence remains a safe file link. |
+| Workspace focus | Client and Community Manager overviews contain only summary metrics and navigation guidance. Projects, accepted reports, applicants/invitations, TTL assignment, and transfer activity live in dedicated query-parameter workspace sections. |
+
+Migration `0005_payout_transfer_tracking.sql` was applied only to the isolated staging project. It adds the `payout_sent` transaction event type used to record a completed transfer without changing existing transaction records.
+
+## Validation record for the update
+
+The full suite passed **53 tests**, with **one intentional opt-in database test skipped**. The coverage includes Community Manager-only payout confirmation, pending-state conflict protection, immutable `payout_sent` event creation, tester-scoped history, named Community Manager audit history, secure image rendering in the reporter/assigned-TTL/Business-Owner surfaces, and the absence of detailed Client and Community Manager data from their overview sections. The production build completed successfully; the client bundle retains an existing size warning only.
+
+The final visual check was deliberately unauthenticated and read-only. It confirmed the public landing page and the protected workspace access gate render correctly. No test cycle, application, invitation, report, withdrawal, payout, role assignment, or other business data was created or changed through the browser during this update. Authenticated staging workflow testing remains appropriate only with explicit permission and non-production fixtures.

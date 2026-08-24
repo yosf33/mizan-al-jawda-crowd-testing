@@ -78,6 +78,11 @@ describe("V3 crowd-testing workflow guards", () => {
     await expect(caller.communityManager.eligibleTesters()).rejects.toThrow("ليس لديك الصلاحية");
   });
 
+  it("does not let a tester confirm or reject another tester's payout", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.communityManager.processPayout({ payoutId: bugId, decision: "processed", note: "تحويل تجريبي" })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
   it("does not let a business owner query TTL-only review assignments", async () => {
     const caller = appRouter.createCaller(contextFor("client"));
     await expect(caller.ttl.assignedCycles()).rejects.toThrow("ليس لديك الصلاحية");
@@ -108,5 +113,23 @@ describe("V3 crowd-testing workflow guards", () => {
     expect(routerSource).toContain('"information_requested"');
     expect(routerSource).toContain("await sendReviewEmail");
     expect(routerSource).toContain("await notifyReportReviewerOutcome");
+  });
+
+  it("records a confirmed Community Manager payout as an immutable payout-sent transaction and notifies its tester", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain('requireRole(ctx.user.role, ["community_manager"])');
+    expect(routerSource).toContain('if (request.status !== "pending")');
+    expect(routerSource).toContain('type: "payout_sent"');
+    expect(routerSource).toContain('referenceType: "payout_request"');
+    expect(routerSource).toContain('await notify(request.testerId, input.decision === "processed" ? "تم إرسال التحويل"');
+  });
+
+  it("keeps a tester transaction history scoped to their wallet while Community Managers receive the named cross-tester audit view", () => {
+    const dashboardSource = readFileSync(new URL("./crowdtesting.ts", import.meta.url), "utf8");
+    expect(dashboardSource).toContain('where(eq(payoutRequests.testerId, userId))');
+    expect(dashboardSource).toContain('where(eq(transactions.walletId, wallet.id))');
+    expect(dashboardSource).toContain('if (role === "community_manager")');
+    expect(dashboardSource).toContain('testerEmail: profiles.email');
+    expect(dashboardSource).toContain('from(transactions).innerJoin(wallets, eq(wallets.id, transactions.walletId)).innerJoin(profiles, eq(profiles.id, wallets.userId))');
   });
 });

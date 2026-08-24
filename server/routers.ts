@@ -109,6 +109,18 @@ export const appRouter = router({
       await db.update(testCycleInvitations).set({ status: "applied", respondedAt: new Date() }).where(and(eq(testCycleInvitations.testCycleId, input.testCycleId), eq(testCycleInvitations.testerId, ctx.user.id), eq(testCycleInvitations.status, "pending")));
       return { success: true, status: "pending" as const };
     }),
+    cycleDetails: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
+      requireRole(ctx.user.role, ["tester"]);
+      const db = dbOrFail();
+      const [application] = await db.select({ id: testCycleApplications.id }).from(testCycleApplications)
+        .where(and(eq(testCycleApplications.testCycleId, input.testCycleId), eq(testCycleApplications.testerId, ctx.user.id), eq(testCycleApplications.status, "accepted"))).limit(1);
+      if (!application) fail("لا تتاح تفاصيل الدورة إلا للمختبر الذي قُبل طلب انضمامه.", "FORBIDDEN");
+      const [cycle] = await db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, outOfScope: testCycles.outOfScope, buildUrl: testCycles.buildUrl, status: testCycles.status, startAt: testCycles.startAt, endAt: testCycles.endAt, projectName: projects.name })
+        .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId)).where(eq(testCycles.id, input.testCycleId)).limit(1);
+      if (!cycle) fail("دورة الاختبار غير موجودة.", "NOT_FOUND");
+      const rates = await db.select({ severity: cycleBountyRates.severity, bountyAmount: cycleBountyRates.bountyAmount }).from(cycleBountyRates).where(eq(cycleBountyRates.testCycleId, input.testCycleId));
+      return { ...cycle, rates };
+    }),
     submitReport: protectedProcedure.input(z.object({ testCycleId: uuid, deviceId: uuid, title: z.string().min(5).max(240), category: z.enum(categoryValues), severity: z.enum(severityValues), stepsToReproduce: z.string().min(10).max(12000), expectedResult: z.string().min(5).max(6000), actualResult: z.string().min(5).max(6000), attachmentIds: z.array(uuid).max(12).default([]) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
       const db = dbOrFail();
@@ -173,27 +185,27 @@ export const appRouter = router({
     }),
     eligibleTesters: protectedProcedure.query(async ({ ctx }) => {
       requireRole(ctx.user.role, ["client"]);
-      return dbOrFail().select({ id: profiles.id, name: profiles.name, reputationScore: testerProfiles.reputationScore, country: testerProfiles.country })
+      return dbOrFail().select({ id: profiles.id, name: profiles.name, email: profiles.email, reputationScore: testerProfiles.reputationScore, country: testerProfiles.country })
         .from(profiles).innerJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
         .where(and(eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt))).orderBy(desc(testerProfiles.reputationScore));
     }),
-    inviteTester: protectedProcedure.input(z.object({ testCycleId: uuid, testerId: uuid })).mutation(async ({ ctx, input }) => {
+    inviteTester: protectedProcedure.input(z.object({ testCycleId: uuid, testerId: uuid.optional(), testerEmail: z.string().email().max(320).optional() }).refine((value) => Boolean(value.testerId || value.testerEmail), "أدخل بريد المختبر أو اختره من القائمة.")).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["client"]);
       const db = dbOrFail();
       await ownedCycle(db, ctx.user.id, input.testCycleId);
       const [tester] = await db.select({ id: profiles.id }).from(profiles).innerJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
-        .where(and(eq(profiles.id, input.testerId), eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt))).limit(1);
-      if (!tester) fail("يمكن دعوة مختبر مكتمل الملف فقط.", "NOT_FOUND");
-      const [existing] = await db.select().from(testCycleInvitations).where(and(eq(testCycleInvitations.testCycleId, input.testCycleId), eq(testCycleInvitations.testerId, input.testerId))).limit(1);
+        .where(and(input.testerId ? eq(profiles.id, input.testerId) : eq(profiles.email, input.testerEmail!), eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt))).limit(1);
+      if (!tester) fail("لا يوجد مختبر مكتمل الملف بهذا البريد الإلكتروني.", "NOT_FOUND");
+      const [existing] = await db.select().from(testCycleInvitations).where(and(eq(testCycleInvitations.testCycleId, input.testCycleId), eq(testCycleInvitations.testerId, tester.id))).limit(1);
       if (existing) await db.update(testCycleInvitations).set({ invitedBy: ctx.user.id, status: "pending", respondedAt: null }).where(eq(testCycleInvitations.id, existing.id));
-      else await db.insert(testCycleInvitations).values({ testCycleId: input.testCycleId, testerId: input.testerId, invitedBy: ctx.user.id });
+      else await db.insert(testCycleInvitations).values({ testCycleId: input.testCycleId, testerId: tester.id, invitedBy: ctx.user.id });
       return { success: true };
     }),
     cycleApplications: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["client"]);
       const db = dbOrFail();
       await ownedCycle(db, ctx.user.id, input.testCycleId);
-      return db.select({ id: testCycleApplications.id, testerId: testCycleApplications.testerId, status: testCycleApplications.status, appliedAt: testCycleApplications.appliedAt, decisionReason: testCycleApplications.decisionReason, testerName: profiles.name, reputationScore: testerProfiles.reputationScore })
+      return db.select({ id: testCycleApplications.id, testerId: testCycleApplications.testerId, status: testCycleApplications.status, appliedAt: testCycleApplications.appliedAt, decisionReason: testCycleApplications.decisionReason, testerName: profiles.name, testerEmail: profiles.email, reputationScore: testerProfiles.reputationScore })
         .from(testCycleApplications).innerJoin(profiles, eq(profiles.id, testCycleApplications.testerId)).leftJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
         .where(eq(testCycleApplications.testCycleId, input.testCycleId)).orderBy(desc(testCycleApplications.appliedAt));
     }),
@@ -222,12 +234,13 @@ export const appRouter = router({
       const db = dbOrFail();
       const reports = await db.select().from(bugReports).where(and(eq(bugReports.testCycleId, input.testCycleId), eq(bugReports.status, "pending"))).orderBy(desc(bugReports.createdAt));
       const events = reports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
-      return projectReportsWithHistory(reports, events);
+      const attachments = reports.length ? await db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, reports.map(report => report.id))) : [];
+      return projectReportsWithHistory(reports, events, attachments);
     }),
     cycleApplications: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
       if (!(await isActiveCycleTtl(ctx.user.id, input.testCycleId))) fail("لست قائداً معيّناً لهذه الدورة.", "FORBIDDEN");
-      return dbOrFail().select({ id: testCycleApplications.id, testerId: testCycleApplications.testerId, status: testCycleApplications.status, appliedAt: testCycleApplications.appliedAt, decisionReason: testCycleApplications.decisionReason, testerName: profiles.name, reputationScore: testerProfiles.reputationScore })
+      return dbOrFail().select({ id: testCycleApplications.id, testerId: testCycleApplications.testerId, status: testCycleApplications.status, appliedAt: testCycleApplications.appliedAt, decisionReason: testCycleApplications.decisionReason, testerName: profiles.name, testerEmail: profiles.email, reputationScore: testerProfiles.reputationScore })
         .from(testCycleApplications).innerJoin(profiles, eq(profiles.id, testCycleApplications.testerId)).leftJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
         .where(eq(testCycleApplications.testCycleId, input.testCycleId)).orderBy(desc(testCycleApplications.appliedAt));
     }),
@@ -304,9 +317,30 @@ export const appRouter = router({
     }),
     cycleTtls: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["community_manager"]);
-      return dbOrFail().select({ id: testCycleTtls.id, testerId: testCycleTtls.testerId, assignedAt: testCycleTtls.assignedAt, testerName: profiles.name, reputationScore: testerProfiles.reputationScore })
+      return dbOrFail().select({ id: testCycleTtls.id, testerId: testCycleTtls.testerId, assignedAt: testCycleTtls.assignedAt, testerName: profiles.name, testerEmail: profiles.email, reputationScore: testerProfiles.reputationScore })
         .from(testCycleTtls).innerJoin(profiles, eq(profiles.id, testCycleTtls.testerId)).leftJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
         .where(and(eq(testCycleTtls.testCycleId, input.testCycleId), isNull(testCycleTtls.revokedAt))).orderBy(desc(testCycleTtls.assignedAt));
+    }),
+    processPayout: protectedProcedure.input(z.object({ payoutId: uuid, decision: z.enum(["processed", "rejected"]), note: z.string().min(3).max(2000) })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.user.role, ["community_manager"]);
+      const db = dbOrFail();
+      const [request] = await db.select().from(payoutRequests).where(eq(payoutRequests.id, input.payoutId)).limit(1);
+      if (!request) fail("طلب السحب غير موجود.", "NOT_FOUND");
+      if (request.status !== "pending") fail("تمت معالجة طلب السحب مسبقاً.", "CONFLICT");
+      await db.transaction(async tx => {
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${request.testerId}))`);
+        await tx.update(payoutRequests).set({ status: input.decision, processingNote: input.note, processedAt: new Date() }).where(and(eq(payoutRequests.id, request.id), eq(payoutRequests.status, "pending")));
+        const [wallet] = await tx.select().from(wallets).where(eq(wallets.userId, request.testerId)).limit(1);
+        if (!wallet) fail("محفظة المختبر غير متاحة.", "CONFLICT");
+        if (input.decision === "processed") {
+          await tx.insert(transactions).values({ walletId: wallet.id, amount: "0.00", type: "payout_sent", referenceType: "payout_request", referenceId: request.id, note: input.note });
+        } else {
+          await tx.update(wallets).set({ availableBalance: money(Number(wallet.availableBalance) + Number(request.amount)), updatedAt: new Date() }).where(eq(wallets.id, wallet.id));
+          await tx.insert(transactions).values({ walletId: wallet.id, amount: money(Number(request.amount)), type: "payout_reversal", referenceType: "payout_request", referenceId: request.id, note: "استرداد طلب سحب مرفوض" });
+        }
+      });
+      await notify(request.testerId, input.decision === "processed" ? "تم إرسال التحويل" : "تم رفض طلب السحب", input.note, "payout", request.id);
+      return { success: true };
     }),
   }),
   roles: router({

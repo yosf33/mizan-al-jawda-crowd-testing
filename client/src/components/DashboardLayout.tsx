@@ -36,12 +36,14 @@ export default function DashboardLayout({
   roleLabel,
   navItems,
   notificationCount = 0,
+  notifications = [],
 }: {
   children: React.ReactNode;
   title: string;
   roleLabel: string;
   navItems: DashboardNavItem[];
   notificationCount?: number;
+  notifications?: Array<{ id: string; title: string; body: string; readAt?: unknown }>;
 }) {
   const { loading, user, logout } = useAuth();
   const [location, setLocation] = useLocation();
@@ -146,11 +148,11 @@ export default function DashboardLayout({
                   {notificationCount > 0 ? <span className="absolute -left-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-[#b94242] px-1 text-[10px] text-white">{notificationCount}</span> : null}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 text-right">
+              <DropdownMenuContent align="start" className="w-80 text-right">
                 <div dir="rtl">
                   <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-[#67747d]">راجع مركز الإشعارات داخل لوحة التحكم.</DropdownMenuItem>
+                  {notifications.length ? notifications.slice(0, 5).map((item) => <DropdownMenuItem key={item.id} className="block cursor-default whitespace-normal py-3 focus:bg-[#faf4e5]"><p className="text-sm font-bold text-[#263f56]">{item.title}</p><p className="mt-1 text-xs leading-5 text-[#687780]">{item.body}</p></DropdownMenuItem>) : <DropdownMenuItem className="cursor-default text-[#67747d]">لا توجد إشعارات جديدة حالياً.</DropdownMenuItem>}
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>

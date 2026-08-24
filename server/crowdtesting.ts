@@ -30,14 +30,21 @@ export function money(value: string | number) {
   return Number(value).toFixed(2);
 }
 
-export function projectReportsWithHistory<T extends { id: string }, E extends { bugReportId: string }>(reports: T[], events: E[]) {
+export function projectReportsWithHistory<T extends { id: string }, E extends { bugReportId: string }, A extends { bugReportId: string | null }>(reports: T[], events: E[], attachments: A[] = []) {
   const eventsByReport = new Map<string, E[]>();
+  const attachmentsByReport = new Map<string, A[]>();
   for (const event of events) {
     const history = eventsByReport.get(event.bugReportId) ?? [];
     history.push(event);
     eventsByReport.set(event.bugReportId, history);
   }
-  return reports.map(report => ({ ...report, statusHistory: eventsByReport.get(report.id) ?? [] }));
+  for (const attachment of attachments) {
+    if (!attachment.bugReportId) continue;
+    const reportAttachments = attachmentsByReport.get(attachment.bugReportId) ?? [];
+    reportAttachments.push(attachment);
+    attachmentsByReport.set(attachment.bugReportId, reportAttachments);
+  }
+  return reports.map(report => ({ ...report, statusHistory: eventsByReport.get(report.id) ?? [], attachments: attachmentsByReport.get(report.id) ?? [] }));
 }
 
 export async function notify(userId: string, title: string, body: string, entityType?: string, entityId?: string) {
@@ -83,7 +90,10 @@ export async function dashboardFor(role: string, userId: string) {
     });
     const reports = await db.select().from(bugReports).where(eq(bugReports.testerId, userId)).orderBy(desc(bugReports.createdAt)).limit(30);
     const reportEvents = reports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
-    return { kind: "tester" as const, profile, wallet, devices, activeCycles, reports: projectReportsWithHistory(reports, reportEvents) };
+    const attachments = reports.length ? await db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, reports.map(report => report.id))).orderBy(desc(bugAttachments.createdAt)) : [];
+    const payoutHistory = await db.select().from(payoutRequests).where(eq(payoutRequests.testerId, userId)).orderBy(desc(payoutRequests.requestedAt)).limit(30);
+    const transactionsHistory = wallet ? await db.select().from(transactions).where(eq(transactions.walletId, wallet.id)).orderBy(desc(transactions.createdAt)).limit(50) : [];
+    return { kind: "tester" as const, profile, wallet, devices, activeCycles, reports: projectReportsWithHistory(reports, reportEvents, attachments), payoutHistory, transactionsHistory };
   }
 
   if (role === "client") {
@@ -93,13 +103,18 @@ export async function dashboardFor(role: string, userId: string) {
     const cycleIds = cycles.map(cycle => cycle.id);
     const acceptedReports = cycleIds.length ? await db.select().from(bugReports).where(and(inArray(bugReports.testCycleId, cycleIds), eq(bugReports.status, "accepted"))).orderBy(desc(bugReports.createdAt)) : [];
     const reportEvents = acceptedReports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, acceptedReports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
-    return { kind: "client" as const, projects: ownedProjects, cycles, acceptedReports: projectReportsWithHistory(acceptedReports, reportEvents) };
+    const attachments = acceptedReports.length ? await db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, acceptedReports.map(report => report.id))).orderBy(desc(bugAttachments.createdAt)) : [];
+    return { kind: "client" as const, projects: ownedProjects, cycles, acceptedReports: projectReportsWithHistory(acceptedReports, reportEvents, attachments) };
   }
 
   if (role === "community_manager") {
     const cycles = await db.select({ id: testCycles.id, title: testCycles.title, status: testCycles.status, projectName: projects.name })
       .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId)).orderBy(desc(testCycles.createdAt));
-    return { kind: "community_manager" as const, cycles };
+    const pendingPayouts = await db.select({ id: payoutRequests.id, testerId: payoutRequests.testerId, testerName: profiles.name, testerEmail: profiles.email, amount: payoutRequests.amount, method: payoutRequests.method, paymentTargetInfo: payoutRequests.paymentTargetInfo, status: payoutRequests.status, processingNote: payoutRequests.processingNote, requestedAt: payoutRequests.requestedAt, processedAt: payoutRequests.processedAt })
+      .from(payoutRequests).innerJoin(profiles, eq(profiles.id, payoutRequests.testerId)).where(eq(payoutRequests.status, "pending")).orderBy(desc(payoutRequests.requestedAt));
+    const transactionsHistory = await db.select({ id: transactions.id, amount: transactions.amount, type: transactions.type, referenceType: transactions.referenceType, referenceId: transactions.referenceId, note: transactions.note, createdAt: transactions.createdAt, testerId: profiles.id, testerName: profiles.name, testerEmail: profiles.email })
+      .from(transactions).innerJoin(wallets, eq(wallets.id, transactions.walletId)).innerJoin(profiles, eq(profiles.id, wallets.userId)).orderBy(desc(transactions.createdAt)).limit(100);
+    return { kind: "community_manager" as const, cycles, pendingPayouts, transactionsHistory };
   }
 
   if (role === "admin") {

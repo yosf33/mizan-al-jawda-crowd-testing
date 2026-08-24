@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { startLogin } from "@/const";
+import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowLeft,
   ArrowUpLeft,
@@ -32,7 +33,8 @@ const steps = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const goOnboard = () => setLocation("/sign-up");
+  const { user } = useAuth();
+  const goOnboard = () => setLocation(user ? "/workspace" : "/sign-up");
 
   return (
     <main dir="rtl" className="min-h-screen overflow-hidden bg-[#f8f4e9] text-[#102a43]">
@@ -47,7 +49,7 @@ export default function Home() {
           <a href="#trust">الثقة والأمان</a>
           <button onClick={() => setLocation("/workspace")} className="hover:text-[#a87921]">مساحة العمل</button>
         </nav>
-        <Button variant="outline" onClick={() => startLogin()} className="border-[#c7a751] bg-[#fffdf8] text-[#604a18] hover:bg-[#fbf4dd]">تسجيل الدخول</Button>
+        <Button variant="outline" onClick={() => user ? setLocation("/workspace") : startLogin()} className="border-[#c7a751] bg-[#fffdf8] text-[#604a18] hover:bg-[#fbf4dd]">{user ? "مساحة العمل" : "تسجيل الدخول"}</Button>
       </header>
 
       <section className="relative z-10 mx-auto grid max-w-7xl gap-12 px-5 pb-20 pt-16 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:pb-28 lg:pt-24">
