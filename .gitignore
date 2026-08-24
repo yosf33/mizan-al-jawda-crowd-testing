@@ -110,6 +110,7 @@ temp/
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
 
-# Manus version file (auto-generated, not part of source)
-client/public/__manus__/version.json
+# Managed-workspace artifacts are never needed by the independent Vercel deployment.
+.manus/
+.manus-logs/
 .project-config.json

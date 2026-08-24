@@ -11,18 +11,14 @@ afterEach(() => {
 });
 
 describe("Drizzle PostgreSQL configuration", () => {
-  it("uses the PostgreSQL fallback instead of a managed local MySQL DATABASE_URL", async () => {
-    vi.stubEnv("DATABASE_URL", "mysql://managed.example.test/platform");
-    vi.stubEnv("SUPABASE_DATABASE_URL", "postgresql://pooler.example.test/postgres");
+  it("requires a PostgreSQL DATABASE_URL", async () => {
+    vi.stubEnv("DATABASE_URL", "mysql://unsupported.example.test/platform");
 
-    const { default: configuration } = await loadDrizzleConfiguration();
-
-    expect(configuration.dbCredentials.url).toBe("postgresql://pooler.example.test/postgres");
+    await expect(loadDrizzleConfiguration()).rejects.toThrow("A PostgreSQL DATABASE_URL is required");
   });
 
   it("uses the Vercel DATABASE_URL when it is already PostgreSQL", async () => {
     vi.stubEnv("DATABASE_URL", "postgresql://vercel.example.test/postgres");
-    vi.stubEnv("SUPABASE_DATABASE_URL", "postgresql://fallback.example.test/postgres");
 
     const { default: configuration } = await loadDrizzleConfiguration();
 

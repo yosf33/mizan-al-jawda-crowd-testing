@@ -21,7 +21,7 @@ describe("staged email signup", () => {
     const signIn = readProjectFile("client/src/pages/SignIn.tsx");
 
     expect(app).toContain('path="/sign-up"');
-    expect(home).toContain('setLocation("/sign-up")');
+    expect(home).toContain('user ? "/workspace" : "/sign-up"');
     expect(signIn).toContain('setLocation("/sign-up")');
   });
 });

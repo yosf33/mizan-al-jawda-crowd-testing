@@ -14,6 +14,8 @@ export const env = {
   // Accept the legacy service-role variable during controlled migrations.
   supabaseSecretKey: value("SUPABASE_SECRET_KEY") || value("SUPABASE_SERVICE_ROLE_KEY"),
   publicAppUrl: value("PUBLIC_APP_URL"),
+  resendApiKey: value("RESEND_API_KEY"),
+  emailFrom: value("EMAIL_FROM"),
 };
 
 export function hasServerConfiguration() {

@@ -9,14 +9,15 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 
-const payoutLabels = { instapay: "Instapay", vodafone_cash: "Vodafone Cash", paypal: "PayPal", bank_transfer: "bank transfer" } as const;
+const payoutLabels = { instapay: "Instapay", vodafone_cash: "Vodafone Cash", paypal: "PayPal", bank_transfer: "تحويل بنكي (Bank transfer)" } as const;
 
 export default function Onboarding() {
   const { user, loading, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [role, setRole] = useState<"tester" | "client">("tester");
   const [form, setForm] = useState({ country: "", phoneNumber: "", payoutMethod: "instapay" as keyof typeof payoutLabels, payoutDetails: "", deviceType: "mobile" as "mobile" | "desktop" | "tablet", brandModel: "", osName: "android" as "android" | "ios" | "windows" | "macos" | "linux", osVersion: "" });
-  const onboarding = trpc.account.onboarding.useMutation({ onSuccess: () => { toast.success("تم إعداد الحساب بنجاح."); setLocation("/workspace"); }, onError: error => toast.error(error.message) });
+  const utils = trpc.useUtils();
+  const onboarding = trpc.account.onboarding.useMutation({ onSuccess: async () => { await utils.account.profile.invalidate(); await utils.account.profile.refetch(); toast.success("تم إعداد الحساب بنجاح."); setLocation("/workspace"); }, onError: error => toast.error(error.message) });
   const update = (key: keyof typeof form, value: string) => setForm(current => ({ ...current, [key]: value }));
   const handleLogout = async () => {
     try {

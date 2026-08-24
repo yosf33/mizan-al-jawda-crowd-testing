@@ -4,7 +4,7 @@ import { getDb } from "./db";
 import { profiles } from "../drizzle/schema";
 import { getSupabaseAdmin } from "./supabase";
 
-export type AuthUser = { id: string; email: string | null; name: string | null; role: "user" | "tester" | "client" | "admin" };
+export type AuthUser = { id: string; email: string | null; name: string | null; role: "user" | "tester" | "client" | "community_manager" | "admin" };
 export type TrpcContext = { req: Request; res: Response; user: AuthUser | null };
 
 async function resolveUser(req: Request): Promise<AuthUser | null> {

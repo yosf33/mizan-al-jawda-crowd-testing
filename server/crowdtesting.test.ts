@@ -1,16 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { appRouter } from "./routers";
-import { assertRole, money } from "./crowdtesting";
-import type { TrpcContext } from "./_core/context";
+import { assertRole, money, projectReportsWithHistory } from "./crowdtesting";
+import { sendReviewEmail } from "./mail";
+import type { TrpcContext } from "./context";
 
-function contextFor(role: "tester" | "client" | "admin"): TrpcContext {
+const cycleId = "00000000-0000-4000-8000-000000000001";
+const deviceId = "00000000-0000-4000-8000-000000000002";
+const bugId = "00000000-0000-4000-8000-000000000003";
+
+function contextFor(role: "tester" | "client" | "community_manager" | "admin"): TrpcContext {
   return {
     user: {
-      id: 1,
+      id: "00000000-0000-4000-8000-000000000010",
       openId: "test-user",
       name: "Test User",
       email: "test@example.com",
-      loginMethod: "manus",
+      loginMethod: "supabase",
       role,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -21,29 +27,109 @@ function contextFor(role: "tester" | "client" | "admin"): TrpcContext {
   };
 }
 
-describe("crowd-testing workflow guards", () => {
+describe("V3 crowd-testing workflow guards", () => {
   it("formats financial values to two decimal places", () => {
     expect(money(12)).toBe("12.00");
     expect(money("7.456")).toBe("7.46");
   });
 
-  it("permits only the stated allowed roles", () => {
-    expect(() => assertRole("tester", ["tester", "admin"])).not.toThrow();
-    expect(() => assertRole("client", ["tester", "admin"])).toThrow("ليس لديك صلاحية");
+  it("permits only the stated server-derived roles", () => {
+    expect(() => assertRole("community_manager", ["community_manager", "admin"])).not.toThrow();
+    expect(() => assertRole("tester", ["community_manager", "admin"])).toThrow("ليس لديك صلاحية");
   });
 
-  it("requires a written reason before a client can reject a bug", async () => {
-    const caller = appRouter.createCaller(contextFor("client"));
-    await expect(caller.clientPortal.decideBug({ bugId: 1, decision: "reject" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
-  });
-
-  it("requires both an original reference and a written reason when triaging a duplicate", async () => {
-    const caller = appRouter.createCaller(contextFor("admin"));
-    await expect(caller.admin.triageBug({ bugId: 1, action: "mark_duplicate", reason: "سبب واضح يشرح التكرار" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
-  });
-
-  it("rejects bug reports with categories outside the exact permitted set", async () => {
+  it("rejects a malformed report before it can reach persistence", async () => {
     const caller = appRouter.createCaller(contextFor("tester"));
-    await expect(caller.tester.submitReport({ testCycleId: 1, deviceId: 1, title: "عنوان تقرير اختبار", category: "security", severity: "major", stepsToReproduce: "خطوات كافية لإعادة إنتاج الخطأ في التطبيق", expectedResult: "نتيجة متوقعة", actualResult: "نتيجة فعلية" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(caller.tester.submitReport({
+      testCycleId: cycleId,
+      deviceId,
+      title: "عنوان تقرير اختبار",
+      category: "security",
+      severity: "major",
+      stepsToReproduce: "خطوات كافية لإعادة إنتاج الخطأ في التطبيق",
+      expectedResult: "نتيجة متوقعة",
+      actualResult: "نتيجة فعلية",
+    } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("requires a written reason before a TTL can reject a report", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.ttl.reviewBug({ bugId, action: "rejected" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("requires a written reason before a TTL can request more information", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.ttl.reviewBug({ bugId, action: "request_information" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("projects persisted report fields with ordered status history for authorized views", () => {
+    const reports = [{ id: bugId, title: "تعذر إتمام الدفع", status: "pending", stepsToReproduce: "افتح صفحة الدفع ثم اضغط تأكيد", expectedResult: "يتم الإتمام", actualResult: "تظهر رسالة خطأ" }];
+    const events = [
+      { id: "event-1", bugReportId: bugId, type: "submitted", message: null, createdAt: new Date("2026-08-24T08:00:00.000Z") },
+      { id: "event-2", bugReportId: bugId, type: "information_requested", message: "أرفق لقطة للشاشة", createdAt: new Date("2026-08-24T09:00:00.000Z") },
+    ];
+    const [report] = projectReportsWithHistory(reports, events);
+    expect(report).toMatchObject({ title: "تعذر إتمام الدفع", stepsToReproduce: "افتح صفحة الدفع ثم اضغط تأكيد", statusHistory: events });
+    expect(report.statusHistory.map(event => event.type)).toEqual(["submitted", "information_requested"]);
+  });
+
+  it("does not let a tester query Community Manager controls", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.communityManager.eligibleTesters()).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a tester confirm or reject another tester's payout", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.communityManager.processPayout({ payoutId: bugId, decision: "processed", note: "تحويل تجريبي" })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a business owner query TTL-only review assignments", async () => {
+    const caller = appRouter.createCaller(contextFor("client"));
+    await expect(caller.ttl.assignedCycles()).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a business owner apply to a test cycle as a tester", async () => {
+    const caller = appRouter.createCaller(contextFor("client"));
+    await expect(caller.tester.applyToCycle({ testCycleId: cycleId })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a tester invoke the Business Owner invitation flow", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    await expect(caller.clientPortal.inviteTester({ testCycleId: cycleId, testerId: deviceId })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("does not let a Business Owner invoke the TTL application-decision route", async () => {
+    const caller = appRouter.createCaller(contextFor("client"));
+    await expect(caller.ttl.decideApplication({ applicationId: bugId, decision: "accepted" })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("skips email delivery safely when no recipient is available", async () => {
+    await expect(sendReviewEmail({ to: null, title: "تقرير تجريبي", outcome: "accepted" })).resolves.toEqual({ delivered: false, skipped: true });
+  });
+
+  it("keeps all three TTL review outcomes connected to the persisted notification and email trigger", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("notifyReportReviewerOutcome");
+    expect(routerSource).toContain('"information_requested"');
+    expect(routerSource).toContain("await sendReviewEmail");
+    expect(routerSource).toContain("await notifyReportReviewerOutcome");
+  });
+
+  it("records a confirmed Community Manager payout as an immutable payout-sent transaction and notifies its tester", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain('requireRole(ctx.user.role, ["community_manager"])');
+    expect(routerSource).toContain('if (request.status !== "pending")');
+    expect(routerSource).toContain('type: "payout_sent"');
+    expect(routerSource).toContain('referenceType: "payout_request"');
+    expect(routerSource).toContain('await notify(request.testerId, input.decision === "processed" ? "تم إرسال التحويل"');
+  });
+
+  it("keeps a tester transaction history scoped to their wallet while Community Managers receive the named cross-tester audit view", () => {
+    const dashboardSource = readFileSync(new URL("./crowdtesting.ts", import.meta.url), "utf8");
+    expect(dashboardSource).toContain('where(eq(payoutRequests.testerId, userId))');
+    expect(dashboardSource).toContain('where(eq(transactions.walletId, wallet.id))');
+    expect(dashboardSource).toContain('if (role === "community_manager")');
+    expect(dashboardSource).toContain('testerEmail: profiles.email');
+    expect(dashboardSource).toContain('from(transactions).innerJoin(wallets, eq(wallets.id, transactions.walletId)).innerJoin(profiles, eq(profiles.id, wallets.userId))');
   });
 });

@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@theme inline { --font-sans: "Alexandria", sans-serif; --font-mono: "DM Mono", monospace; --color-background: oklch(0.97 0.012 91); --color-foreground: oklch(0.25 0.045 244); --color-card: oklch(0.99 0.012 91); --color-card-foreground: oklch(0.25 0.045 244); --color-popover: oklch(0.99 0.012 91); --color-popover-foreground: oklch(0.25 0.045 244); --color-primary: oklch(0.25 0.045 244); --color-primary-foreground: oklch(0.99 0.01 91); --color-secondary: oklch(0.93 0.055 91); --color-secondary-foreground: oklch(0.25 0.045 244); --color-muted: oklch(0.94 0.02 91); --color-muted-foreground: oklch(0.48 0.026 244); --color-accent: oklch(0.91 0.07 87); --color-accent-foreground: oklch(0.25 0.045 244); --color-border: oklch(0.86 0.035 88); --color-input: oklch(0.86 0.035 88); --color-ring: oklch(0.68 0.105 83); --radius: 1rem; }
+@theme inline { --font-sans: "Alexandria", sans-serif; --font-arabic-display: "Noto Kufi Arabic", "Alexandria", sans-serif; --font-mono: "DM Mono", monospace; --color-background: oklch(0.97 0.012 91); --color-foreground: oklch(0.25 0.045 244); --color-card: oklch(0.99 0.012 91); --color-card-foreground: oklch(0.25 0.045 244); --color-popover: oklch(0.99 0.012 91); --color-popover-foreground: oklch(0.25 0.045 244); --color-primary: oklch(0.25 0.045 244); --color-primary-foreground: oklch(0.99 0.01 91); --color-secondary: oklch(0.93 0.055 91); --color-secondary-foreground: oklch(0.25 0.045 244); --color-muted: oklch(0.94 0.02 91); --color-muted-foreground: oklch(0.48 0.026 244); --color-accent: oklch(0.91 0.07 87); --color-accent-foreground: oklch(0.25 0.045 244); --color-border: oklch(0.86 0.035 88); --color-input: oklch(0.86 0.035 88); --color-ring: oklch(0.68 0.105 83); --radius: 1rem; }
 
 @layer base { * { @apply border-border; } html { scroll-behavior: smooth; } body { @apply bg-background font-sans text-foreground; } button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; } button { transition: transform 160ms var(--ease-out), background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out); } button:active { transform: scale(.97); } }
 
@@ -14,11 +14,16 @@
 .sign-in-card { inline-size: min(100%, 28rem); min-inline-size: 0; box-sizing: border-box; }
 .onboarding-page { inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; box-sizing: border-box; overflow-x: clip; }
 .onboarding-guest-card { width: calc(100vw - 3rem); max-width: 28rem; min-width: 0; margin-inline: auto; box-sizing: border-box; }
-.eyebrow { color: #a87921; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.eyebrow { color: #a87921; font-size: .72rem; font-weight: 800; letter-spacing: normal; text-transform: uppercase; }
+.arabic-display { font-family: var(--font-arabic-display); font-kerning: normal; font-variant-ligatures: common-ligatures; letter-spacing: normal !important; line-height: 1.32 !important; overflow: visible; text-wrap: balance; }
+.signed-in-identity { display: flex; min-width: 0; align-items: center; gap: .65rem; border: 1px solid rgba(202, 171, 86, .6); border-radius: 1rem; background: rgba(255, 253, 248, .85); padding: .5rem .75rem; box-shadow: 0 10px 25px rgba(41, 58, 71, .05); }
+.signed-in-identity p { max-width: 13rem; overflow: hidden; color: #52646f; font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
+.signed-in-home-card { display: flex; max-width: 37rem; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(190, 151, 55, .52); border-radius: 1.35rem; background: linear-gradient(120deg, rgba(255,253,248,.95), rgba(245,234,208,.82)); padding: 1rem 1.15rem; box-shadow: 0 18px 36px rgba(41,58,71,.08); }
+.signed-in-home-card__email { display: block; margin-top: .2rem; color: #65727b; font-family: var(--font-mono); font-size: .72rem; direction: ltr; text-align: right; }
 .rtl-select { width: 100%; height: 2.5rem; border: 1px solid #dfd0ab; border-radius: .7rem; background: #fffdf8; padding: 0 .75rem; color: #19344f; outline: none; transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out); }
 .rtl-select:focus { border-color: #b98c30; box-shadow: 0 0 0 3px rgba(185,140,48,.15); }
 .workspace-hero { display: flex; min-height: 166px; align-items: flex-end; justify-content: space-between; gap: 1.5rem; overflow: hidden; border-radius: 1.65rem; border: 1px solid #dfca86; background: radial-gradient(circle at 75% 50%, rgba(226,191,95,.42) 0 1px, transparent 2px), linear-gradient(125deg, #fffdf8, #f4ead0); background-size: 18px 18px, auto; padding: 2rem; }
-.workspace-hero h2 { margin-top: .3rem; font-size: clamp(1.6rem, 3vw, 2.35rem); font-weight: 800; letter-spacing: -.04em; }
+.workspace-hero h2 { margin-top: .3rem; font-family: var(--font-arabic-display); font-size: clamp(1.6rem, 3vw, 2.35rem); font-weight: 800; letter-spacing: normal; line-height: 1.38; }
 .workspace-hero p:not(.eyebrow) { margin-top: .65rem; max-width: 44rem; color: #5e6d76; line-height: 1.8; }
 .hero-orbit { position: absolute; border: 1px solid rgba(192,151,49,.55); border-radius: 999px; }
 .hero-orbit-one { inset: 7% 14% 12% 5%; }

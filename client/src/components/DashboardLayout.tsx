@@ -24,7 +24,8 @@ import {
 import { startLogin } from "@/const";
 import { Bell, LogOut, PanelRight, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useLocation } from "wouter";
+import { useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 
 export type DashboardNavItem = { label: string; path: string; icon: LucideIcon };
@@ -35,15 +36,39 @@ export default function DashboardLayout({
   roleLabel,
   navItems,
   notificationCount = 0,
+  notifications = [],
 }: {
   children: React.ReactNode;
   title: string;
   roleLabel: string;
   navItems: DashboardNavItem[];
   notificationCount?: number;
+  notifications?: Array<{ id: string; title: string; body: string; readAt?: unknown }>;
 }) {
   const { loading, user, logout } = useAuth();
   const [location, setLocation] = useLocation();
+  const search = useSearch();
+  const locationHash = location.includes("#") ? location.split("#")[1] : "";
+  const normalizedSearch = search ? (search.startsWith("?") ? search : `?${search}`) : "";
+  const activeLocation = normalizedSearch && !location.includes("?") ? `${location}${normalizedSearch}` : location;
+
+  useEffect(() => {
+    if (!locationHash) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(locationHash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [locationHash]);
+
+  const navigateTo = (path: string) => {
+    setLocation(path);
+    const hash = path.includes("#") ? path.split("#")[1] : "";
+    if (hash) {
+      window.requestAnimationFrame(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  };
 
   if (loading) return <DashboardLayoutSkeleton />;
   if (!user) {
@@ -77,7 +102,7 @@ export default function DashboardLayout({
             <SidebarMenu>
               {navItems.map(item => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton isActive={location === item.path} onClick={() => setLocation(item.path)} className="h-11 rounded-xl px-3 data-[active=true]:bg-[#f5edd3] data-[active=true]:text-[#102a43]">
+                  <SidebarMenuButton isActive={activeLocation === item.path} onClick={() => navigateTo(item.path)} className="h-11 rounded-xl px-3 data-[active=true]:bg-[#f5edd3] data-[active=true]:text-[#102a43]">
                     <item.icon className="h-4 w-4" />
                     <span>{item.label}</span>
                   </SidebarMenuButton>
@@ -126,11 +151,11 @@ export default function DashboardLayout({
                   {notificationCount > 0 ? <span className="absolute -left-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-[#b94242] px-1 text-[10px] text-white">{notificationCount}</span> : null}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 text-right">
+              <DropdownMenuContent align="start" className="w-80 text-right">
                 <div dir="rtl">
                   <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-[#67747d]">راجع مركز الإشعارات داخل لوحة التحكم.</DropdownMenuItem>
+                  {notifications.length ? notifications.slice(0, 5).map((item) => <DropdownMenuItem key={item.id} className="block cursor-default whitespace-normal py-3 focus:bg-[#faf4e5]"><p className="text-sm font-bold text-[#263f56]">{item.title}</p><p className="mt-1 text-xs leading-5 text-[#687780]">{item.body}</p></DropdownMenuItem>) : <DropdownMenuItem className="cursor-default text-[#67747d]">لا توجد إشعارات جديدة حالياً.</DropdownMenuItem>}
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>

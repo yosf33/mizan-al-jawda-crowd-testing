@@ -16,8 +16,8 @@ function Router() {
     <Route path="/" component={Home} />
     <Route path="/sign-in" component={SignIn} />
     <Route path="/sign-up" component={SignUp} />
-    <Route path="/policies" component={Policies} />
     <Route path="/onboarding" component={Onboarding} />
+    <Route path="/policies" component={Policies} />
     <Route path="/workspace" component={Workspace} />
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />

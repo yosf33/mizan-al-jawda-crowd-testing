@@ -11,15 +11,18 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const userRole = pgEnum("user_role", ["user", "tester", "client", "admin"]);
+export const userRole = pgEnum("user_role", ["user", "tester", "client", "community_manager", "admin"]);
 export const payoutMethod = pgEnum("payout_method", ["instapay", "vodafone_cash", "paypal", "bank_transfer"]);
 export const deviceKind = pgEnum("device_kind", ["mobile", "desktop", "tablet"]);
 export const operatingSystem = pgEnum("operating_system", ["android", "ios", "windows", "macos", "linux"]);
 export const cycleStatus = pgEnum("cycle_status", ["draft", "active", "in_review", "completed"]);
 export const bugCategory = pgEnum("bug_category", ["functional", "ui", "performance", "crash"]);
 export const severityLevel = pgEnum("severity_level", ["critical", "major", "minor"]);
-export const bugStatus = pgEnum("bug_status", ["submitted", "under_review", "request_changes", "triaged", "approved", "rejected", "duplicate"]);
-export const transactionType = pgEnum("transaction_type", ["bounty_pending", "bounty_released", "payout_debit", "payout_reversal"]);
+export const bugStatus = pgEnum("bug_status", ["pending", "accepted", "rejected"]);
+export const applicationStatus = pgEnum("application_status", ["pending", "accepted", "rejected"]);
+export const invitationStatus = pgEnum("invitation_status", ["pending", "applied", "expired"]);
+export const reportEventType = pgEnum("report_event_type", ["submitted", "information_requested", "accepted", "rejected"]);
+export const transactionType = pgEnum("transaction_type", ["bounty_pending", "bounty_released", "payout_debit", "payout_reversal", "payout_sent"]);
 export const payoutStatus = pgEnum("payout_status", ["pending", "processed", "rejected"]);
 export const notificationType = pgEnum("notification_type", ["bug_status", "payout", "system"]);
 
@@ -86,6 +89,48 @@ export const cycleBountyRates = pgTable("cycle_bounty_rates", {
   bountyAmount: numeric("bounty_amount", { precision: 12, scale: 2 }).notNull(),
 }, table => [uniqueIndex("cycle_severity_unique").on(table.testCycleId, table.severity)]);
 
+export const testCycleApplications = pgTable("test_cycle_applications", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  testCycleId: uuid("test_cycle_id").notNull(),
+  testerId: uuid("tester_id").notNull(),
+  status: applicationStatus("status").default("pending").notNull(),
+  appliedAt: timestamp("applied_at", { withTimezone: true }).defaultNow().notNull(),
+  decidedBy: uuid("decided_by"),
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
+  decisionReason: text("decision_reason"),
+}, table => [
+  uniqueIndex("cycle_application_unique").on(table.testCycleId, table.testerId),
+  index("cycle_application_tester_idx").on(table.testerId, table.status),
+  index("cycle_application_cycle_idx").on(table.testCycleId, table.status),
+]);
+
+export const testCycleInvitations = pgTable("test_cycle_invitations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  testCycleId: uuid("test_cycle_id").notNull(),
+  testerId: uuid("tester_id").notNull(),
+  invitedBy: uuid("invited_by").notNull(),
+  status: invitationStatus("status").default("pending").notNull(),
+  createdAt,
+  respondedAt: timestamp("responded_at", { withTimezone: true }),
+}, table => [
+  uniqueIndex("cycle_invitation_unique").on(table.testCycleId, table.testerId),
+  index("cycle_invitation_tester_idx").on(table.testerId, table.status),
+  index("cycle_invitation_cycle_idx").on(table.testCycleId),
+]);
+
+export const testCycleTtls = pgTable("test_cycle_ttls", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  testCycleId: uuid("test_cycle_id").notNull(),
+  testerId: uuid("tester_id").notNull(),
+  assignedBy: uuid("assigned_by").notNull(),
+  assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+}, table => [
+  uniqueIndex("cycle_ttl_unique").on(table.testCycleId, table.testerId),
+  index("cycle_ttl_tester_idx").on(table.testerId, table.revokedAt),
+  index("cycle_ttl_cycle_idx").on(table.testCycleId, table.revokedAt),
+]);
+
 export const bugReports = pgTable("bug_reports", {
   id: uuid("id").defaultRandom().primaryKey(),
   testCycleId: uuid("test_cycle_id").notNull(),
@@ -97,17 +142,23 @@ export const bugReports = pgTable("bug_reports", {
   stepsToReproduce: text("steps_to_reproduce").notNull(),
   expectedResult: text("expected_result").notNull(),
   actualResult: text("actual_result").notNull(),
-  status: bugStatus("status").default("submitted").notNull(),
-  duplicateOfId: uuid("duplicate_of_id"),
-  duplicateReason: text("duplicate_reason"),
+  status: bugStatus("status").default("pending").notNull(),
   rejectionReason: text("rejection_reason"),
   requestChangesReason: text("request_changes_reason"),
-  triagedBy: uuid("triaged_by"),
-  triagedAt: timestamp("triaged_at", { withTimezone: true }),
-  clientDecidedAt: timestamp("client_decided_at", { withTimezone: true }),
+  reviewedBy: uuid("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   createdAt,
   updatedAt,
 }, table => [index("bug_tester_idx").on(table.testerId), index("bug_cycle_idx").on(table.testCycleId), index("bug_status_idx").on(table.status)]);
+
+export const bugReportEvents = pgTable("bug_report_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  bugReportId: uuid("bug_report_id").notNull(),
+  actorId: uuid("actor_id").notNull(),
+  type: reportEventType("type").notNull(),
+  message: text("message"),
+  createdAt,
+}, table => [index("bug_report_event_report_idx").on(table.bugReportId, table.createdAt)]);
 
 export const bugAttachments = pgTable("bug_attachments", {
   id: uuid("id").defaultRandom().primaryKey(),

@@ -53,3 +53,88 @@
 - [ ] Validate health, auth, tRPC, role security, evidence authorization, financial rules, and responsive RTL behavior on Vercel.
 - [x] Use the user's connected personal browser for all Vercel dashboard and deployment interactions.
 - [x] Add missing covering indexes for the Supabase performance-advisor findings on bug-report and reputation-event foreign keys, then rerun the advisor check.
+- [x] Prepare a no-change staging-environment plan covering branch flow, isolated Supabase resources, Vercel Preview configuration, validation gates, and rollback controls while preserving current production.
+- [x] Confirm a second Supabase Free-tier project slot and capture the non-secret production baseline before staging provisioning.
+- [x] Create an isolated Supabase staging project without copying production data, then apply the reviewed schema migrations and verify RLS, Storage, and advisors.
+- [x] Create a `staging` Git branch and configure its Vercel Preview deployment with Preview-scoped staging variables only.
+- [x] Configure closed-beta staging Auth with the exact Preview URL, confirmation retained, and self-service signup disabled.
+- [x] Save and independently verify persisted staging provider switch states for Email enabled, Confirm email enabled, and self-service signup disabled.
+- [x] Validate staging isolation, health endpoints, authentication boundaries, and non-secret deployment evidence without changing Production, domains, or Manus.
+- [x] Review and publish the completed non-secret staging environment updates to the approved GitHub `staging` branch without merging to Production.
+- [x] Validate the open staging pull requests and close only user-approved obsolete requests without merging or changing Production; no open requests were present.
+- [x] Verify the current Production browser-side Supabase configuration after the reported sign-in error; the issue was not reproducible, required entries and bundle configuration are present, and no Production change was made.
+- [ ] Reproduce the persistent Production sign-in configuration error in the user’s connected browser and identify the exact deployed runtime cause before changing Production.
+- [ ] Review the referenced crowd-testing bug report, reproduce confirmed defects in staging, fix them with regression coverage, and seek approval before any Production release.
+- [x] Fix workspace auth and onboarding-state transitions so no authenticated or anonymous user receives a blank workspace.
+- [x] Make sidebar hash navigation scroll to the visible target and mark the active workspace destination.
+- [x] Add accessible policy destinations for privacy, terms, and evidence handling from the public footer.
+- [x] Add no-cycle and zero-balance workflow guardrails, modal descriptions, and accessible evidence-upload naming.
+- [x] Localize known Arabic authentication errors and payout-method labels consistently.
+- [x] Add focused automated regression coverage for the confirmed public, routing, and form-guardrail defects.
+- [ ] Run authenticated staging acceptance checks with purpose-made fixtures before recommending any Production release.
+- [x] Inspect the existing Supabase Auth flow and staging confirmation settings for the requested signup feature.
+- [x] Implement an Arabic email-and-password signup flow with confirmation, safe error handling, and accessible validation states on the staging branch.
+- [ ] Add signup regression coverage and validate the staging confirmation redirect before any Production recommendation.
+- [ ] Enable staging self-service signup only after explicit approval, while retaining email confirmation and disabled anonymous/manual-linking controls.
+- [ ] Validate a purpose-made staging signup, email-confirmation redirect, sign-in, and onboarding entry without retaining credentials or test data beyond explicit authorization.
+- [x] Enable self-service signup in both staging and Production Supabase Auth environments while retaining email confirmation and disabled anonymous/manual-linking controls.
+- [x] Publish the signup interface to the staging and Production branches only after branch-specific validation and user-approved release controls.
+- [x] Promote the reviewed signup implementation from staging to `migration/supabase-vercel-free-tier` and verify the Vercel Production `/sign-up` route.
+- [x] Reassess the referenced crowd-testing testing guidance against the current staging and Production releases, reproduce any new non-destructive defects, and fix only verified issues with regression coverage.
+- [x] Promote only the validated anonymous workspace gate and public policy-route fixes to Production, then revalidate both deployed routes.
+- [x] Compare GitHub branch heads and Vercel deployment commits to explain the apparent source-versus-deployment discrepancy without changing either system.
+- [x] Compare `main` with the current Production branch, synchronize main safely, resolve verified merge issues, and validate before updating the remote branch.
+- [x] Switch Vercel’s Production Branch from `migration/supabase-vercel-free-tier` to `main` and verify the mapping without changing the current live deployment.
+- [x] Enforce server-side eligibility so testers may submit reports only after a test-cycle application has been accepted.
+- [x] Add pending, accepted, and rejected bug-report statuses with a triage history that distinguishes a request for more information from a final decision.
+- [x] Add a securely assigned TTL (test-team lead) role, scoped to assigned test cycles, with report accept, reject, and information-request permissions.
+- [x] Add a server-enforced Community Manager role that alone can assign or revoke TTL membership without client-side role spoofing.
+- [x] Show Business Owners the accepted reports for their own test cycles only.
+- [x] Let Business Owners invite eligible testers to apply for a specific test cycle and let invited or eligible testers apply.
+- [x] Let the Business Owner or an assigned TTL accept or reject test-cycle applications with auditable server-side authorization.
+- [ ] Send a tester email after a report is accepted, rejected, or marked as requiring more information, without exposing credentials or message-provider secrets.
+- [x] Configure the email delivery provider through connected services without asking the user to paste API keys; request browser takeover only if the provider requires user-owned sign-in or sender verification.
+- [x] Ensure persisted bug-report fields and status history render reliably in the tester and authorized owner/TTL views.
+- [x] Repair the tester-side تقاريري and المحفظة navigation so each menu item renders its intended section and action path.
+- [x] Add automated regression coverage for the V3 authorization, status, application, invitation, notification-trigger, persistence, and navigation requirements.
+- [ ] Verify arbitrary-recipient status-email delivery after a sender address or domain is verified for Resend Production use.
+- [x] Redeploy the post-navigation-fix staging commit and verify in the browser that تقاريري and المحفظة render distinct V3 content and action paths.
+- [x] Correct the deployed `?section=reports` section selection so تقاريري replaces the overview with its dedicated saved-report view.
+- [x] Add fixture-backed validation that shows persisted report details and status history in tester, assigned TTL, and authorized Business Owner views.
+- [x] Expand and document V3 regression coverage for populated report rendering and status-notification triggers, then rerun the full suite.
+- [x] Add explicit regression tests for test-cycle application and Business Owner/TTL invitation authorization, then rerun the full suite.
+- [x] Add fixture-backed server and UI regression coverage for populated persisted report fields and status history in tester, assigned TTL, and authorized Business Owner views.
+- [x] Add runtime tests that render populated report details and status history in tester, Business Owner, and assigned-TTL views.
+- [x] Add an interaction test for the actual tester "عرض البيانات المحفوظة" path and verify persisted fields and ordered status history without test-only props.
+- [x] Reapply the V3 validation record with the final populated-report and notification-trigger regression evidence.
+- [x] Create the requested staging-only user account and assign the persisted Community Manager role without changing Production authentication or profile data.
+- [ ] Verify the staging account exists and has only the requested Community Manager role, without exposing credentials.
+- [ ] Reset the staging Community Manager account password through a secret-safe recovery flow and invalidate the exposed password.
+- [ ] Record non-secret staging account verification evidence after the credential reset without storing a password.
+- [x] Fix header-logo navigation so it returns to the public home page without unnecessarily discarding an active authenticated session.
+- [x] Fix Business Owner invitation recipient entry and server validation so eligible tester email addresses can be invited to a test cycle.
+- [x] Show each test-cycle applicant’s approved display name or email rather than the generic "مختبر" label.
+- [x] Render actionable in-app notification content in both the header bell and the dedicated notification workspace.
+- [x] Give an accepted tester a secure detail view for the accepted test cycle and its permitted reporting context.
+- [x] Hide the قيادة الاختبارات menu from users who are not assigned a TTL role or scoped TTL responsibility.
+- [x] Accept Arabic-Indic numerals in withdrawal amount input while preserving server-side monetary validation.
+- [x] Add staged payout-transfer tracking, Community Manager confirmation, tester transaction history, and Community Manager cross-tester transaction visibility with auditable events.
+- [x] Restore authorized report-image rendering for the reporter, assigned TTL, and owning Business Owner using secure evidence access paths.
+- [x] Simplify role-specific overview sections so detailed workflow data is shown in its dedicated Arabic workspace menu instead of duplicating the overview.
+- [x] Add server regression tests for Community Manager payout confirmation, immutable payout-sent events, tester history, and Community Manager cross-tester visibility.
+- [x] Add role-specific rendered-view coverage for tester, assigned TTL, and owning Business Owner report-image evidence through the secure URL contract.
+- [x] Add focused UI regression coverage that overview pages exclude duplicated workflow details while dedicated workspace sections retain them.
+- [x] Keep the active sidebar navigation state synchronized with the currently selected workspace section.
+- [x] Correct Arabic typography metrics so letter dots and diacritics render with readable separation in headings and promotional copy.
+- [x] Design and implement a distinct authenticated home-page experience that visibly confirms sign-in and displays the current account email without exposing credentials.
+- [x] Add regression and visual checks for sidebar selection state, Arabic heading rendering, and the authenticated home-page state.
+- [x] Remove generic tester and test-cycle onboarding actions from the signed-in home page while retaining the dedicated workspace action.
+- [x] Replace the generic "تغطية RTL أصلية" benefit with a more useful product-specific statement for signed-out visitors.
+- [x] Validate the revised signed-in home action hierarchy and benefits copy on staging.
+- [x] Audit GitHub branches, Vercel deployment configuration, and repository references to confirm whether the legacy migration branch is unused and staging is bound to `staging`.
+- [x] Delete the verified unused legacy migration branch only after explicit confirmation, with no Production configuration change.
+- [x] Audit source code, package scripts, Vercel configuration, environment-variable contracts, authentication, storage, database access, and static assets for any remaining Manus dependency.
+- [x] Replace any residual Manus runtime, authentication, storage, build, analytics, or hosting dependency with a Supabase, Vercel, or provider-neutral implementation on staging.
+- [x] Document the independent Supabase and Vercel deployment contract, including required non-secret provider configuration and recovery steps.
+- [x] Add portability regression coverage and validate a staging build and deployment path without Manus runtime services.
+- [ ] Request approval before changing Vercel/Supabase Production settings or declaring Production independent of Manus.
