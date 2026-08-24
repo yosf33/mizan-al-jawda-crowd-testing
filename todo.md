@@ -85,3 +85,15 @@
 - [x] Compare GitHub branch heads and Vercel deployment commits to explain the apparent source-versus-deployment discrepancy without changing either system.
 - [x] Compare `main` with the current Production branch, synchronize main safely, resolve verified merge issues, and validate before updating the remote branch.
 - [x] Switch Vercel’s Production Branch from `migration/supabase-vercel-free-tier` to `main` and verify the mapping without changing the current live deployment.
+- [ ] Enforce server-side eligibility so testers may submit reports only after a test-cycle application has been accepted.
+- [ ] Add pending, accepted, and rejected bug-report statuses with a triage history that distinguishes a request for more information from a final decision.
+- [ ] Add a securely assigned TTL (test-team lead) role, scoped to assigned test cycles, with report accept, reject, and information-request permissions.
+- [ ] Add a server-enforced Community Manager role that alone can assign or revoke TTL membership without client-side role spoofing.
+- [ ] Show Business Owners the accepted reports for their own test cycles only.
+- [ ] Let Business Owners invite eligible testers to apply for a specific test cycle and let invited or eligible testers apply.
+- [ ] Let the Business Owner or an assigned TTL accept or reject test-cycle applications with auditable server-side authorization.
+- [ ] Send a tester email after a report is accepted, rejected, or marked as requiring more information, without exposing credentials or message-provider secrets.
+- [x] Configure the email delivery provider through connected services without asking the user to paste API keys; request browser takeover only if the provider requires user-owned sign-in or sender verification.
+- [ ] Ensure persisted bug-report fields and status history render reliably in the tester and authorized owner/TTL views.
+- [ ] Repair the tester-side تقاريري and المحفظة navigation so each menu item renders its intended section and action path.
+- [ ] Add automated regression coverage for the V3 authorization, status, application, invitation, notification-trigger, persistence, and navigation requirements.

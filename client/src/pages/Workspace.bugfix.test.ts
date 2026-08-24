@@ -14,10 +14,10 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(page).toContain('سجّل دخولك للمتابعة');
   });
 
-  it("blocks report and payout actions that have no eligible cycle or available balance", () => {
+  it("blocks report and payout actions that have no accepted cycle or available balance", () => {
     const page = readProjectFile("client/src/pages/Workspace.tsx");
-    expect(page).toContain("noActiveCycles");
-    expect(page).toContain("لا توجد دورة اختبار نشطة");
+    expect(page).toContain("acceptedCycles.length");
+    expect(page).toContain("لا توجد دورة مقبولة");
     expect(page).toContain("لا يوجد رصيد قابل للسحب حالياً");
     expect(page).toContain("Number(amount) <= available");
   });
