@@ -34,7 +34,7 @@
 - [ ] Add and execute a Vercel CLI build validation without exposing deployment secrets.
 - [x] Replace obsolete Render deployment guidance with the Vercel serverless deployment contract and free-tier operating guardrails.
 - [x] Replace the remaining Render reference in Supabase connection guidance and re-scan deployment documentation.
-- [ ] Complete a clean provider-side Vercel and Supabase configuration audit after the earlier exposure-and-rotation incident, recording only non-secret confirmation.
+- [x] Complete a clean provider-side Vercel and Supabase configuration audit after the earlier exposure-and-rotation incident, recording only non-secret confirmation.
 - [x] Switch the Vercel production branch from `main` to the validated Supabase/Vercel migration branch and record the non-secret deployment evidence.
 - [x] Disable Vercel Authentication so the generated Vercel URL is publicly accessible for the approved closed-beta deployment.
 - [x] Deploy and verify the publicly accessible Vercel Production URL from the approved public GitHub repository.
@@ -137,4 +137,5 @@
 - [x] Replace any residual Manus runtime, authentication, storage, build, analytics, or hosting dependency with a Supabase, Vercel, or provider-neutral implementation on staging.
 - [x] Document the independent Supabase and Vercel deployment contract, including required non-secret provider configuration and recovery steps.
 - [x] Add portability regression coverage and validate a staging build and deployment path without Manus runtime services.
-- [ ] Request approval before changing Vercel/Supabase Production settings or declaring Production independent of Manus.
+- [x] Request approval before changing Vercel/Supabase Production settings or declaring Production independent of Manus.
+- [x] Promote the validated staging portability and V3 workflow changes to `main`, verify the resulting Vercel Production deployment, public health response, Vercel variable scopes, and Supabase Auth Production URL configuration without viewing or changing credentials.

@@ -30,6 +30,14 @@ The inactive managed-workspace scaffold has been removed from the tracked applic
 
 On 2026-08-24, `pnpm check`, the complete test suite, `pnpm build`, and `pnpm run vercel-build` all passed after the cleanup. The suite reported 18 passed test files, 59 passed tests, and one intentional opt-in live database test skipped. The Vite client bundle still emits its pre-existing chunk-size warning; it is not a runtime dependency issue.
 
-## Remaining provider-owned checks before Production independence is declared
+## Production promotion and readiness evidence
 
-The repository and local staging build are independent of Manus. Before declaring the **existing Production deployment** independent, the user must approve verification or update of Production Vercel variables to the documented contract, confirm Supabase Auth redirect URLs include the Production Vercel/custom domain, and perform an authenticated Production smoke test. These provider-side checks were not changed by this audit.
+The user approved Production promotion and non-secret provider checks on 2026-08-24. The validated `staging` branch was merged into `main` as Git commit `b054d7a` (`Merge staging portability and workflow updates`) and pushed to the user-owned GitHub repository.
+
+Vercel created deployment `C1HqaZm6cvYdedjeG8sdzV7ywsei` from `main` at `b054d7a`. Its dashboard reported **Ready**, **Production**, and **Current**. The public domain <https://mizan-al-jawda-crowd-testing.vercel.app/> then served the promoted signed-out benefit copy `تقارير بحالة واضحة`; `/api/health` returned `{"configured":true,"ok":true,"service":"mizan-al-jawda"}`. No Vercel setting or secret value was changed during this verification.
+
+The Vercel Environment Variables page again showed only the documented portable runtime variables in Production: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_PUBLISHABLE_KEY`. Preview/staging-only Resend variables remained outside Production. No `VITE_` secret variable, Manus/Forge variable, or attached Vercel Storage resource was observed.
+
+Supabase Auth URL Configuration was also inspected without changes. Its Site URL and approved redirect list include <https://mizan-al-jawda-crowd-testing.vercel.app/> (with `http://localhost:3000/` retained for local development). This confirms that the Production domain is authorized for the existing Supabase Auth flows.
+
+Therefore, the deployed Production runtime is operational on **Vercel hosting/functions plus Supabase Auth, PostgreSQL, and Storage**, with no remaining Manus runtime, build, authentication, database, storage, analytics, or hosting dependency found in the audited path. This evidence does not substitute for a new authenticated end-to-end Production workflow test, which remains outside this promotion check. The previously declined staging Community Manager password remediation remains unperformed.
