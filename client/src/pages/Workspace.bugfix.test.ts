@@ -149,4 +149,11 @@ describe("referenced crowd-testing regression fixes", () => {
     expect(home).toContain("{user.email}");
     expect(home).toContain("حسابك نشط وجاهز للعمل");
   });
+
+  it("removes generic onboarding actions for signed-in visitors and avoids the generic RTL benefit claim", () => {
+    const home = readProjectFile("client/src/pages/Home.tsx");
+    expect(home).toContain("{!user ? <div className=\"mt-9 flex flex-wrap gap-3\">");
+    expect(home).toContain("تقارير بحالة واضحة");
+    expect(home).not.toContain("تغطية RTL أصلية");
+  });
 });

@@ -13,8 +13,6 @@ import {
   Network,
   ShieldCheck,
   Sparkles,
-  Target,
-  TestTube2,
   Workflow,
 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -62,12 +60,12 @@ export default function Home() {
           <p className="eyebrow">{user ? "مساحة الجودة الخاصة بك" : "منظومة عربية لاكتشاف العيوب قبل الإطلاق"}</p>
           <h1 className="arabic-display mt-5 max-w-3xl text-[2.25rem] font-extrabold text-[#102a43] sm:text-6xl lg:text-7xl">{user ? <>كل ما تحتاجه لقيادة <span className="block text-[#b58225]">الجودة بثقة.</span></> : <>الجودة ليست مصادفة.<span className="block text-[#b58225]">إنها هندسة ثقة.</span></>}</h1>
           <p className="mt-7 max-w-2xl text-lg leading-8 text-[#53626d]">{user ? "أنت مسجّل الدخول الآن. افتح مساحة العمل لمتابعة دورات الاختبار والتقارير والإشعارات والدفعات المرتبطة بحسابك." : "نربط فرق البرمجيات بمختبرين موثوقين لاكتشاف الأخطاء الوظيفية وتجارب الاستخدام الحرجة، ضمن دورة فرز ومكافآت شفافة."}</p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Button size="lg" onClick={goOnboard} className="bg-[#102a43] px-6 hover:bg-[#173a59]"><TestTube2 className="h-4 w-4" />انضم كمختبر</Button>
-            <Button size="lg" variant="outline" onClick={goOnboard} className="border-[#c8a952] bg-[#fffdf8] px-6 text-[#70531c] hover:bg-[#fbf4dd]"><Target className="h-4 w-4" />أطلق دورة اختبار</Button>
-          </div>
+          {!user ? <div className="mt-9 flex flex-wrap gap-3">
+            <Button size="lg" onClick={goOnboard} className="bg-[#102a43] px-6 hover:bg-[#173a59]"><Fingerprint className="h-4 w-4" />انضم كمختبر</Button>
+            <Button size="lg" variant="outline" onClick={goOnboard} className="border-[#c8a952] bg-[#fffdf8] px-6 text-[#70531c] hover:bg-[#fbf4dd]"><Workflow className="h-4 w-4" />أطلق دورة اختبار</Button>
+          </div> : null}
           <div className="mt-12 flex flex-wrap gap-x-8 gap-y-4 text-sm text-[#63717b]">
-            <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a67a20]" />تغطية RTL أصلية</span>
+            <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a67a20]" />تقارير بحالة واضحة</span>
             <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a67a20]" />أدلة محمية بالصلاحيات</span>
             <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#a67a20]" />دفعات قابلة للتتبع</span>
           </div>

@@ -128,3 +128,6 @@
 - [x] Correct Arabic typography metrics so letter dots and diacritics render with readable separation in headings and promotional copy.
 - [x] Design and implement a distinct authenticated home-page experience that visibly confirms sign-in and displays the current account email without exposing credentials.
 - [x] Add regression and visual checks for sidebar selection state, Arabic heading rendering, and the authenticated home-page state.
+- [x] Remove generic tester and test-cycle onboarding actions from the signed-in home page while retaining the dedicated workspace action.
+- [x] Replace the generic "تغطية RTL أصلية" benefit with a more useful product-specific statement for signed-out visitors.
+- [x] Validate the revised signed-in home action hierarchy and benefits copy on staging.
