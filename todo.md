@@ -155,3 +155,5 @@
 - [x] Mitigate BUG-013 in source: make V3 dashboard/assigned-cycle reads tolerate only missing V3 tables, retain safe workspace hydration, and replace unexpected tRPC database errors with a generic Arabic message under regression coverage.
 - [x] Apply the existing V3 workflow and payout migrations to the Production Supabase database only after explicit approval, then promote the verified staging mitigation to `main` and repeat authenticated workflow validation.
 - [x] Verify Production migration preconditions, apply the approved V3 workflow and payout migrations, promote `f7227ab` from `staging` to `main`, and validate the resulting Production deployment.
+- [x] Perform a fresh Production reproduction of referenced BUG-001 through BUG-013, including public routes, accessibility semantics, and authenticated workspace behavior when a safe test session is available; fix only newly confirmed regressions.
+- [x] Investigate the apparent BUG-005 policy-navigation regression: fresh verification confirmed the public fragment links and hydrated `/policies` route both work; the initial isolated assertion was a selector/timing false positive.
