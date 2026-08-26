@@ -157,3 +157,4 @@
 - [x] Verify Production migration preconditions, apply the approved V3 workflow and payout migrations, promote `f7227ab` from `staging` to `main`, and validate the resulting Production deployment.
 - [x] Perform a fresh Production reproduction of referenced BUG-001 through BUG-013, including public routes, accessibility semantics, and authenticated workspace behavior when a safe test session is available; fix only newly confirmed regressions.
 - [x] Investigate the apparent BUG-005 policy-navigation regression: fresh verification confirmed the public fragment links and hydrated `/policies` route both work; the initial isolated assertion was a selector/timing false positive.
+- [ ] Fast-forward `staging` to the current `main` head after the fresh QA documentation commits, push the synchronized branch, and verify the resulting Vercel Preview health endpoint.
