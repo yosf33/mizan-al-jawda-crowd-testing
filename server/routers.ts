@@ -5,7 +5,7 @@ import {
   bugAttachments, bugReportEvents, bugReports, cycleBountyRates, notifications, payoutRequests, profiles, reputationEvents,
   projects, testCycleApplications, testCycleInvitations, testCycleTtls, testerDevices, testerProfiles, testCycles, transactions, wallets,
 } from "../drizzle/schema";
-import { dashboardFor, isActiveCycleTtl, money, notify, projectReportsWithHistory } from "./crowdtesting";
+import { dashboardFor, isActiveCycleTtl, money, notify, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
 import { getDb } from "./db";
 import { sendReviewEmail } from "./mail";
 import { storageGetSignedUrl, storagePut } from "./storage";
@@ -224,9 +224,9 @@ export const appRouter = router({
   ttl: router({
     assignedCycles: protectedProcedure.query(async ({ ctx }) => {
       requireRole(ctx.user.role, ["tester"]);
-      return dbOrFail().select({ id: testCycles.id, title: testCycles.title, projectName: projects.name, status: testCycles.status })
+      return readV3OrFallback(() => dbOrFail().select({ id: testCycles.id, title: testCycles.title, projectName: projects.name, status: testCycles.status })
         .from(testCycleTtls).innerJoin(testCycles, eq(testCycles.id, testCycleTtls.testCycleId)).innerJoin(projects, eq(projects.id, testCycles.projectId))
-        .where(and(eq(testCycleTtls.testerId, ctx.user.id), isNull(testCycleTtls.revokedAt))).orderBy(desc(testCycles.createdAt));
+        .where(and(eq(testCycleTtls.testerId, ctx.user.id), isNull(testCycleTtls.revokedAt))).orderBy(desc(testCycles.createdAt)), []);
     }),
     pendingReports: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
