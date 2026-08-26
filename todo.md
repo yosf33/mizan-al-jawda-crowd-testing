@@ -154,3 +154,4 @@
 - [x] Revalidate and, if necessary, fix BUG-012: sign-in copy must match the available signup path.
 - [x] Mitigate BUG-013 in source: make V3 dashboard/assigned-cycle reads tolerate only missing V3 tables, retain safe workspace hydration, and replace unexpected tRPC database errors with a generic Arabic message under regression coverage.
 - [ ] Apply the existing V3 workflow and payout migrations to the Production Supabase database only after explicit approval, then promote the verified staging mitigation to `main` and repeat authenticated workflow validation.
+- [ ] Verify Production migration preconditions, apply the approved V3 workflow and payout migrations, promote `f7227ab` from `staging` to `main`, and validate the resulting Production deployment.
