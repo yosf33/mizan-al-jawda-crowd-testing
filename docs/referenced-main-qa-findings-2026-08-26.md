@@ -25,4 +25,12 @@ The reference also reported a likely production database-schema mismatch in V3 `
 
 On 2026-08-26, the connected Supabase projects were inspected without viewing credentials or changing data. The staging project contains the `v3_test_cycle_workflow` and `v3_1_payout_transfer_tracking` migrations. The Production project contains only its initial-schema, default-deny, and index migrations; it does **not** contain either V3 migration. This confirms that the reported Production missing-table errors are caused by a database migration gap, not a client-side credential issue.
 
-The source mitigation makes only missing V3-table reads fall back safely and converts unexpected server failures to a generic Arabic message; it does not mask other database failures. Applying the existing V3 SQL migrations to Production is deliberately deferred pending the user's explicit approval because it changes the Production schema.
+The source mitigation makes only missing V3-table reads fall back safely and converts unexpected server failures to a generic Arabic message; it does not mask other database failures.
+
+## Approved Production remediation and verification
+
+After explicit user approval on 2026-08-26, the Production schema was rechecked to confirm that the V3 tables were absent while the baseline tables were present. The existing `v3_test_cycle_workflow` migration and its dependent `v3_1_payout_transfer_tracking` migration were then applied in dependency order. Both provider operations completed successfully.
+
+A post-migration, read-only table check confirmed the presence of `test_cycle_applications`, `test_cycle_invitations`, `test_cycle_ttls`, and `bug_report_events`; all four have row-level security enabled. No credentials or user-record values were viewed or changed during this validation.
+
+The staging remediation was merged to `main` as commit `3b0dcfd` (`Merge V3 schema resilience remediation`). Vercel reported that commit as **Ready** in the **Production** environment, and the public `/api/health` endpoint returned `{"configured":true,"ok":true,"service":"mizan-al-jawda"}` after deployment. An authenticated end-to-end workflow was not rerun because no authenticated test session was available; the schema and deployment checks confirm that the original missing-table failure condition has been removed.
