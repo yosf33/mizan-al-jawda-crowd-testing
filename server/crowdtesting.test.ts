@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { appRouter } from "./routers";
-import { assertRole, money, projectReportsWithHistory } from "./crowdtesting";
+import { assertRole, isMissingV3SchemaError, money, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
+import { clientMessageForTrpcError, INTERNAL_ERROR_MESSAGE } from "./trpc";
 import { sendReviewEmail } from "./mail";
 import type { TrpcContext } from "./context";
 
@@ -36,6 +37,18 @@ describe("V3 crowd-testing workflow guards", () => {
   it("permits only the stated server-derived roles", () => {
     expect(() => assertRole("community_manager", ["community_manager", "admin"])).not.toThrow();
     expect(() => assertRole("tester", ["community_manager", "admin"])).toThrow("ليس لديك صلاحية");
+  });
+
+  it("returns safe defaults only for a missing V3 table and preserves other database failures", async () => {
+    const missingTable = Object.assign(new Error("relation test_cycle_applications does not exist"), { code: "42P01" });
+    expect(isMissingV3SchemaError(missingTable)).toBe(true);
+    await expect(readV3OrFallback(async () => { throw missingTable; }, [])).resolves.toEqual([]);
+    await expect(readV3OrFallback(async () => { throw Object.assign(new Error("permission denied"), { code: "42501" }); }, [])).rejects.toMatchObject({ code: "42501" });
+  });
+
+  it("never exposes internal database messages through the tRPC response formatter", () => {
+    expect(clientMessageForTrpcError("INTERNAL_SERVER_ERROR", "column tester_id does not exist")).toBe(INTERNAL_ERROR_MESSAGE);
+    expect(clientMessageForTrpcError("FORBIDDEN", "ليس لديك الصلاحية المطلوبة لإتمام هذه العملية.")).toBe("ليس لديك الصلاحية المطلوبة لإتمام هذه العملية.");
   });
 
   it("rejects a malformed report before it can reach persistence", async () => {

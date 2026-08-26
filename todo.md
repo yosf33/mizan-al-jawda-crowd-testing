@@ -139,3 +139,19 @@
 - [x] Add portability regression coverage and validate a staging build and deployment path without Manus runtime services.
 - [x] Request approval before changing Vercel/Supabase Production settings or declaring Production independent of Manus.
 - [x] Promote the validated staging portability and V3 workflow changes to `main`, verify the resulting Vercel Production deployment, public health response, Vercel variable scopes, and Supabase Auth Production URL configuration without viewing or changing credentials.
+- [x] Merge the current `main` branch back into `staging`, push the synchronized staging source, and verify the resulting Vercel Preview deployment and health endpoint.
+- [x] Revalidate and, if necessary, fix BUG-001: anonymous `/workspace` must render an Arabic sign-in/access state rather than a blank shell.
+- [x] Revalidate and, if necessary, fix BUG-002: a valid sign-in must reach a stable, hydrated workspace rather than an initial blank or incomplete state.
+- [x] Revalidate and, if necessary, fix BUG-003: successful onboarding must transition to the workspace without resetting the submitted form.
+- [x] Revalidate and, if necessary, fix BUG-004: Reports and Wallet navigation must visibly activate and reach their workspace sections.
+- [x] Revalidate and, if necessary, fix BUG-005: public privacy, terms, and evidence-policy labels must remain accessible routes.
+- [x] Revalidate and, if necessary, fix BUG-006: no-cycle report submission must be clearly blocked with accessible required-field semantics.
+- [x] Revalidate and, if necessary, fix BUG-007: zero-balance withdrawal submission must be clearly unavailable.
+- [x] Revalidate and, if necessary, fix BUG-008: report and withdrawal dialogs must provide accessible descriptions.
+- [x] Revalidate and, if necessary, fix BUG-009: the evidence-upload input must have an accessible label.
+- [x] Revalidate and, if necessary, fix BUG-010: known Arabic sign-in errors must be localized.
+- [x] Revalidate and, if necessary, fix BUG-011: all payout-method labels must be consistently localized.
+- [x] Revalidate and, if necessary, fix BUG-012: sign-in copy must match the available signup path.
+- [x] Mitigate BUG-013 in source: make V3 dashboard/assigned-cycle reads tolerate only missing V3 tables, retain safe workspace hydration, and replace unexpected tRPC database errors with a generic Arabic message under regression coverage.
+- [ ] Apply the existing V3 workflow and payout migrations to the Production Supabase database only after explicit approval, then promote the verified staging mitigation to `main` and repeat authenticated workflow validation.
+- [ ] Verify Production migration preconditions, apply the approved V3 workflow and payout migrations, promote `f7227ab` from `staging` to `main`, and validate the resulting Production deployment.

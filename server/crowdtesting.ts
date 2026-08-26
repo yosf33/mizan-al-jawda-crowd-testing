@@ -30,6 +30,19 @@ export function money(value: string | number) {
   return Number(value).toFixed(2);
 }
 
+export function isMissingV3SchemaError(error: unknown) {
+  return Boolean(error && typeof error === "object" && "code" in error && (error as { code?: unknown }).code === "42P01");
+}
+
+export async function readV3OrFallback<T>(operation: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (isMissingV3SchemaError(error)) return fallback;
+    throw error;
+  }
+}
+
 export function projectReportsWithHistory<T extends { id: string }, E extends { bugReportId: string }, A extends { bugReportId: string | null }>(reports: T[], events: E[], attachments: A[] = []) {
   const eventsByReport = new Map<string, E[]>();
   const attachmentsByReport = new Map<string, A[]>();
@@ -56,8 +69,8 @@ export async function notify(userId: string, title: string, body: string, entity
 export async function isActiveCycleTtl(userId: string, testCycleId: string) {
   const db = getDb();
   if (!db) return false;
-  const [assignment] = await db.select({ id: testCycleTtls.id }).from(testCycleTtls)
-    .where(and(eq(testCycleTtls.testerId, userId), eq(testCycleTtls.testCycleId, testCycleId), isNull(testCycleTtls.revokedAt))).limit(1);
+  const [assignment] = await readV3OrFallback(() => db.select({ id: testCycleTtls.id }).from(testCycleTtls)
+    .where(and(eq(testCycleTtls.testerId, userId), eq(testCycleTtls.testCycleId, testCycleId), isNull(testCycleTtls.revokedAt))).limit(1), [] as { id: string }[]);
   return Boolean(assignment);
 }
 
@@ -73,10 +86,12 @@ export async function dashboardFor(role: string, userId: string) {
     const cycles = await db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, buildUrl: testCycles.buildUrl, endAt: testCycles.endAt, projectName: projects.name })
       .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId))
       .where(and(eq(testCycles.status, "active"), lte(testCycles.startAt, now), gte(testCycles.endAt, now))).orderBy(desc(testCycles.endAt));
-    const applications = await db.select({ testCycleId: testCycleApplications.testCycleId, status: testCycleApplications.status })
-      .from(testCycleApplications).where(eq(testCycleApplications.testerId, userId));
-    const invitations = await db.select({ testCycleId: testCycleInvitations.testCycleId, status: testCycleInvitations.status })
-      .from(testCycleInvitations).where(eq(testCycleInvitations.testerId, userId));
+    const [applications, invitations] = await Promise.all([
+      readV3OrFallback(() => db.select({ testCycleId: testCycleApplications.testCycleId, status: testCycleApplications.status })
+        .from(testCycleApplications).where(eq(testCycleApplications.testerId, userId)), [] as { testCycleId: string; status: "pending" | "accepted" | "rejected" }[]),
+      readV3OrFallback(() => db.select({ testCycleId: testCycleInvitations.testCycleId, status: testCycleInvitations.status })
+        .from(testCycleInvitations).where(eq(testCycleInvitations.testerId, userId)), [] as { testCycleId: string; status: "pending" | "applied" | "expired" }[]),
+    ]);
     const applicationByCycle = new Map(applications.map(application => [application.testCycleId, application.status]));
     const invitationByCycle = new Map(invitations.map(invitation => [invitation.testCycleId, invitation.status]));
     const activeCycles = cycles.map(cycle => {
@@ -89,7 +104,7 @@ export async function dashboardFor(role: string, userId: string) {
       };
     });
     const reports = await db.select().from(bugReports).where(eq(bugReports.testerId, userId)).orderBy(desc(bugReports.createdAt)).limit(30);
-    const reportEvents = reports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
+    const reportEvents = reports.length ? await readV3OrFallback(() => db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt), []) : [];
     const attachments = reports.length ? await db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, reports.map(report => report.id))).orderBy(desc(bugAttachments.createdAt)) : [];
     const payoutHistory = await db.select().from(payoutRequests).where(eq(payoutRequests.testerId, userId)).orderBy(desc(payoutRequests.requestedAt)).limit(30);
     const transactionsHistory = wallet ? await db.select().from(transactions).where(eq(transactions.walletId, wallet.id)).orderBy(desc(transactions.createdAt)).limit(50) : [];
