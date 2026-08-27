@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { appRouter } from "./routers";
-import { assertRole, isMissingV3SchemaError, money, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
+import { assertRole, effectiveTestCycleStatus, isMissingV3SchemaError, money, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
 import { clientMessageForTrpcError, INTERNAL_ERROR_MESSAGE } from "./trpc";
 import { sendReviewEmail } from "./mail";
 import type { TrpcContext } from "./context";
@@ -32,6 +32,21 @@ describe("V3 crowd-testing workflow guards", () => {
   it("formats financial values to two decimal places", () => {
     expect(money(12)).toBe("12.00");
     expect(money("7.456")).toBe("7.46");
+  });
+
+  it("moves an active cycle into Arabic in-review lifecycle state at its end instant without changing other statuses", () => {
+    const endAt = new Date("2026-08-26T12:00:00.000Z");
+    expect(effectiveTestCycleStatus("active", endAt, new Date("2026-08-26T11:59:59.999Z"))).toBe("active");
+    expect(effectiveTestCycleStatus("active", endAt, endAt)).toBe("in_review");
+    expect(effectiveTestCycleStatus("completed", endAt, new Date("2026-08-27T12:00:00.000Z"))).toBe("completed");
+  });
+
+  it("persists elapsed active-cycle closure before every role dashboard query", () => {
+    const dashboardSource = readFileSync(new URL("./crowdtesting.ts", import.meta.url), "utf8");
+    const workspaceSource = readFileSync(new URL("../client/src/pages/Workspace.tsx", import.meta.url), "utf8");
+    expect(dashboardSource).toContain("await expireElapsedActiveTestCycles(db, now)");
+    expect(dashboardSource).toContain('eq(testCycles.status, "active"), lte(testCycles.endAt, now)');
+    expect(workspaceSource).toContain('in_review: ["قيد المراجعة"');
   });
 
   it("permits only the stated server-derived roles", () => {

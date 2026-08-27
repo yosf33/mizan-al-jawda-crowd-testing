@@ -43,6 +43,24 @@ export async function readV3OrFallback<T>(operation: () => Promise<T>, fallback:
   }
 }
 
+export type TestCycleStatus = "draft" | "active" | "in_review" | "completed";
+
+/** The business status shown to users once an active cycle reaches its inclusive end instant. */
+export function effectiveTestCycleStatus(status: TestCycleStatus, endAt: Date, now = new Date()): TestCycleStatus {
+  return status === "active" && endAt <= now ? "in_review" : status;
+}
+
+/**
+ * Persist elapsed active cycles as in-review before any dashboard is read. This is idempotent,
+ * avoids an in-process timer, and makes the closed state visible on the first request after expiry.
+ */
+export async function expireElapsedActiveTestCycles(db: NonNullable<ReturnType<typeof getDb>>, now = new Date()) {
+  return db.update(testCycles)
+    .set({ status: "in_review" })
+    .where(and(eq(testCycles.status, "active"), lte(testCycles.endAt, now)))
+    .returning({ id: testCycles.id });
+}
+
 export function projectReportsWithHistory<T extends { id: string }, E extends { bugReportId: string }, A extends { bugReportId: string | null }>(reports: T[], events: E[], attachments: A[] = []) {
   const eventsByReport = new Map<string, E[]>();
   const attachmentsByReport = new Map<string, A[]>();
@@ -77,12 +95,13 @@ export async function isActiveCycleTtl(userId: string, testCycleId: string) {
 export async function dashboardFor(role: string, userId: string) {
   const db = getDb();
   if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
+  const now = new Date();
+  await expireElapsedActiveTestCycles(db, now);
 
   if (role === "tester") {
     const [profile] = await db.select().from(testerProfiles).where(eq(testerProfiles.userId, userId)).limit(1);
     const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
     const devices = await db.select().from(testerDevices).where(eq(testerDevices.testerId, userId));
-    const now = new Date();
     const cycles = await db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, buildUrl: testCycles.buildUrl, endAt: testCycles.endAt, projectName: projects.name })
       .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId))
       .where(and(eq(testCycles.status, "active"), lte(testCycles.startAt, now), gte(testCycles.endAt, now))).orderBy(desc(testCycles.endAt));
