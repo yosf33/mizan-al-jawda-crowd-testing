@@ -3,12 +3,12 @@ import { readFileSync } from "node:fs";
 import { appRouter } from "./routers";
 import { assertRole, effectiveTestCycleStatus, isMissingV3SchemaError, money, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
 import { clientMessageForTrpcError, INTERNAL_ERROR_MESSAGE } from "./trpc";
-import { sendReviewEmail } from "./mail";
 import type { TrpcContext } from "./context";
 
 const cycleId = "00000000-0000-4000-8000-000000000001";
 const deviceId = "00000000-0000-4000-8000-000000000002";
 const bugId = "00000000-0000-4000-8000-000000000003";
+const bugId2 = "00000000-0000-4000-8000-000000000004";
 
 function contextFor(role: "tester" | "client" | "community_manager" | "admin"): TrpcContext {
   return {
@@ -90,6 +90,16 @@ describe("V3 crowd-testing workflow guards", () => {
     await expect(caller.ttl.reviewBug({ bugId, action: "request_information" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
+  it("requires both a written reason and an original bug ID before a TTL can mark a duplicate", async () => {
+    const caller = appRouter.createCaller(contextFor("tester"));
+    // Missing both originalBugId and reason
+    await expect(caller.ttl.reviewBug({ bugId, action: "mark_duplicate" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    // Missing reason
+    await expect(caller.ttl.reviewBug({ bugId, action: "mark_duplicate", originalBugId: bugId2 } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    // Missing originalBugId
+    await expect(caller.ttl.reviewBug({ bugId, action: "mark_duplicate", reason: "سبب كافٍ للتصنيف كتقرير مكرر" } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
   it("projects persisted report fields with ordered status history for authorized views", () => {
     const reports = [{ id: bugId, title: "تعذر إتمام الدفع", status: "pending", stepsToReproduce: "افتح صفحة الدفع ثم اضغط تأكيد", expectedResult: "يتم الإتمام", actualResult: "تظهر رسالة خطأ" }];
     const events = [
@@ -131,16 +141,23 @@ describe("V3 crowd-testing workflow guards", () => {
     await expect(caller.ttl.decideApplication({ applicationId: bugId, decision: "accepted" })).rejects.toThrow("ليس لديك الصلاحية");
   });
 
-  it("skips email delivery safely when no recipient is available", async () => {
-    await expect(sendReviewEmail({ to: null, title: "تقرير تجريبي", outcome: "accepted" })).resolves.toEqual({ delivered: false, skipped: true });
+  it("does not let a non-client invoke the updateCycleStatus route", async () => {
+    const testerCaller = appRouter.createCaller(contextFor("tester"));
+    await expect(testerCaller.clientPortal.updateCycleStatus({ testCycleId: cycleId, status: "active" })).rejects.toThrow("ليس لديك الصلاحية");
   });
 
-  it("keeps all three TTL review outcomes connected to the persisted notification and email trigger", () => {
+  it("does not let a non-tester invoke the updatePayoutSettings route", async () => {
+    const clientCaller = appRouter.createCaller(contextFor("client"));
+    await expect(clientCaller.tester.updatePayoutSettings({ payoutMethod: "instapay", payoutDetails: "account-info" })).rejects.toThrow("ليس لديك الصلاحية");
+  });
+
+  it("keeps all three TTL review outcomes connected to the persisted notification trigger", () => {
     const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
     expect(routerSource).toContain("notifyReportReviewerOutcome");
     expect(routerSource).toContain('"information_requested"');
-    expect(routerSource).toContain("await sendReviewEmail");
     expect(routerSource).toContain("await notifyReportReviewerOutcome");
+    expect(routerSource).not.toContain("sendReviewEmail");
+    expect(routerSource).not.toContain("import { sendReviewEmail }");
   });
 
   it("records a confirmed Community Manager payout as an immutable payout-sent transaction and notifies its tester", () => {
@@ -168,5 +185,54 @@ describe("V3 crowd-testing workflow guards", () => {
     expect(crowdtestingSource).toContain('(c.status === "active" && c.endAt < nowTime) ? "completed"');
     expect(routerSource).toContain('(rawCycle.status === "active" && rawCycle.endAt < new Date()) ? "completed"');
     expect(routerSource).toContain('(c.status === "active" && c.endAt < nowTime) ? "completed"');
+  });
+
+  it("includes per-cycle pending and rejected report counts and tester participation counts in the client dashboard", () => {
+    const dashboardSource = readFileSync(new URL("./crowdtesting.ts", import.meta.url), "utf8");
+    expect(dashboardSource).toContain("pendingReportCount");
+    expect(dashboardSource).toContain("rejectedReportCount");
+    expect(dashboardSource).toContain("acceptedTesterCount");
+    expect(dashboardSource).toContain("pendingApplicationCount");
+  });
+
+  it("notifies invited tester when Business Owner sends an invitation", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("دعوة للانضمام إلى دورة اختبار");
+    expect(routerSource).toContain("تمت دعوتك للتقدم إلى دورة الاختبار");
+  });
+
+  it("notifies active TTLs when a tester submits a new bug report", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("تقرير جديد يحتاج مراجعتك");
+    expect(routerSource).toContain("assignedTtls");
+  });
+
+  it("notifies tester when Community Manager assigns or revokes their TTL role", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("تم تعيينك قائداً لفريق الاختبار");
+    expect(routerSource).toContain("تم إلغاء تعيينك كقائد للاختبار");
+  });
+
+  it("blocks TTL review actions after a cycle's end date", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("انتهى وقت دورة الاختبار ولا يمكن مراجعة التقارير بعد انتهائها");
+  });
+
+  it("enforces video evidence size limit at 50 MB and other evidence at 10 MB", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("50 * 1024 * 1024");
+    expect(routerSource).toContain('input.mimeType === "video/mp4"');
+    expect(routerSource).toContain("68_000_000");
+  });
+
+  it("prevents duplicate device registration with the same brand model", () => {
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+    expect(routerSource).toContain("هذا الجهاز مسجّل مسبقاً في حسابك");
+  });
+
+  it("lazily expires pending invitations whose cycles have ended on dashboard load", () => {
+    const dashboardSource = readFileSync(new URL("./crowdtesting.ts", import.meta.url), "utf8");
+    expect(dashboardSource).toContain("status: \"expired\"");
+    expect(dashboardSource).toContain("tc.end_at <");
   });
 });

@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import {
   bugAttachments,
@@ -111,6 +111,14 @@ export async function dashboardFor(role: string, userId: string) {
       readV3OrFallback(() => db.select({ testCycleId: testCycleInvitations.testCycleId, status: testCycleInvitations.status })
         .from(testCycleInvitations).where(eq(testCycleInvitations.testerId, userId)), [] as { testCycleId: string; status: "pending" | "applied" | "expired" }[]),
     ]);
+    // Lazily expire pending invitations whose cycles have already ended
+    await readV3OrFallback(() => db.update(testCycleInvitations)
+      .set({ status: "expired", respondedAt: now })
+      .where(and(
+        eq(testCycleInvitations.testerId, userId),
+        eq(testCycleInvitations.status, "pending"),
+        sql`exists (select 1 from test_cycles tc where tc.id = ${testCycleInvitations.testCycleId} and tc.end_at < ${now})`
+      )), undefined);
     const applicationByCycle = new Map(applications.map(application => [application.testCycleId, application.status]));
     const invitationByCycle = new Map(invitations.map(invitation => [invitation.testCycleId, invitation.status]));
     const activeCycles = cycles.map(cycle => {
@@ -143,7 +151,31 @@ export async function dashboardFor(role: string, userId: string) {
     const acceptedReports = cycleIds.length ? await db.select().from(bugReports).where(and(inArray(bugReports.testCycleId, cycleIds), eq(bugReports.status, "accepted"))).orderBy(desc(bugReports.createdAt)) : [];
     const reportEvents = acceptedReports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, acceptedReports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
     const attachments = acceptedReports.length ? await db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, acceptedReports.map(report => report.id))).orderBy(desc(bugAttachments.createdAt)) : [];
-    return { kind: "client" as const, projects: ownedProjects, cycles, acceptedReports: projectReportsWithHistory(acceptedReports, reportEvents, attachments) };
+    // Per-cycle aggregate counts for bug progress and tester participation
+    const bugCountsRaw = cycleIds.length ? await db.select({ testCycleId: bugReports.testCycleId, status: bugReports.status, cnt: count() }).from(bugReports).where(inArray(bugReports.testCycleId, cycleIds)).groupBy(bugReports.testCycleId, bugReports.status) : [];
+    const appCountsRaw = cycleIds.length ? await readV3OrFallback(() => db.select({ testCycleId: testCycleApplications.testCycleId, status: testCycleApplications.status, cnt: count() }).from(testCycleApplications).where(inArray(testCycleApplications.testCycleId, cycleIds)).groupBy(testCycleApplications.testCycleId, testCycleApplications.status), [] as { testCycleId: string; status: string; cnt: number }[]) : [];
+    const bugCountsByCycle = new Map<string, { pending: number; rejected: number }>();
+    for (const row of bugCountsRaw) {
+      const entry = bugCountsByCycle.get(row.testCycleId) ?? { pending: 0, rejected: 0 };
+      if (row.status === "pending") entry.pending = Number(row.cnt);
+      if (row.status === "rejected") entry.rejected = Number(row.cnt);
+      bugCountsByCycle.set(row.testCycleId, entry);
+    }
+    const appCountsByCycle = new Map<string, { accepted: number; pending: number }>();
+    for (const row of appCountsRaw) {
+      const entry = appCountsByCycle.get(row.testCycleId) ?? { accepted: 0, pending: 0 };
+      if (row.status === "accepted") entry.accepted = Number(row.cnt);
+      if (row.status === "pending") entry.pending = Number(row.cnt);
+      appCountsByCycle.set(row.testCycleId, entry);
+    }
+    const cyclesWithCounts = cycles.map(cycle => ({
+      ...cycle,
+      pendingReportCount: bugCountsByCycle.get(cycle.id)?.pending ?? 0,
+      rejectedReportCount: bugCountsByCycle.get(cycle.id)?.rejected ?? 0,
+      acceptedTesterCount: appCountsByCycle.get(cycle.id)?.accepted ?? 0,
+      pendingApplicationCount: appCountsByCycle.get(cycle.id)?.pending ?? 0,
+    }));
+    return { kind: "client" as const, projects: ownedProjects, cycles: cyclesWithCounts, acceptedReports: projectReportsWithHistory(acceptedReports, reportEvents, attachments) };
   }
 
   if (role === "community_manager") {

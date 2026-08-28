@@ -7,7 +7,6 @@ import {
 } from "../drizzle/schema";
 import { dashboardFor, isActiveCycleTtl, money, notify, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
 import { getDb } from "./db";
-import { sendReviewEmail } from "./mail";
 import { storageGetSignedUrl, storagePut } from "./storage";
 import { protectedProcedure, publicProcedure, router } from "./trpc";
 
@@ -48,7 +47,7 @@ async function assertApplicationDecisionAuthority(db: any, userId: string, role:
   }
   fail("يمكن لمالك المشروع أو قائد فريق الاختبار المعيّن فقط اتخاذ قرار في طلب الانضمام.", "FORBIDDEN");
 }
-async function notifyReportReviewerOutcome(testerId: string, bugId: string, title: string, outcome: "accepted" | "rejected" | "information_requested", reason?: string) {
+async function notifyReportReviewerOutcome(testerId: string, bugId: string, _title: string, outcome: "accepted" | "rejected" | "information_requested", reason?: string) {
   const copy = outcome === "accepted"
     ? { title: "تم قبول تقريرك", body: "قبل قائد فريق الاختبار تقريرك." }
     : outcome === "rejected"
@@ -56,12 +55,11 @@ async function notifyReportReviewerOutcome(testerId: string, bugId: string, titl
       : { title: "مطلوب معلومات إضافية", body: reason ?? "طلب قائد فريق الاختبار تفاصيل إضافية." };
   try {
     await notify(testerId, copy.title, copy.body, "bug_report", bugId);
-    const [tester] = await dbOrFail().select({ email: profiles.email }).from(profiles).where(eq(profiles.id, testerId)).limit(1);
-    await sendReviewEmail({ to: tester?.email ?? null, title, outcome, reason });
   } catch {
-    console.warn("[notifications] Review decision was saved but a notification could not be delivered");
+    console.warn("[notifications] Review decision was saved but an in-app notification could not be delivered");
   }
 }
+
 
 export const appRouter = router({
   auth: router({
@@ -92,8 +90,19 @@ export const appRouter = router({
   tester: router({
     addDevice: protectedProcedure.input(z.object({ deviceType: z.enum(["mobile", "desktop", "tablet"]), brandModel: z.string().min(2).max(180), osName: z.enum(["android", "ios", "windows", "macos", "linux"]), osVersion: z.string().min(1).max(60) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
-      const [device] = await dbOrFail().insert(testerDevices).values({ testerId: ctx.user.id, ...input }).returning({ id: testerDevices.id });
+      const db = dbOrFail();
+      const [existing] = await db.select({ id: testerDevices.id }).from(testerDevices).where(and(eq(testerDevices.testerId, ctx.user.id), eq(testerDevices.brandModel, input.brandModel))).limit(1);
+      if (existing) fail("هذا الجهاز مسجّل مسبقاً في حسابك.", "CONFLICT");
+      const [device] = await db.insert(testerDevices).values({ testerId: ctx.user.id, ...input }).returning({ id: testerDevices.id });
       return { success: true, id: device.id };
+    }),
+    updatePayoutSettings: protectedProcedure.input(z.object({ payoutMethod: z.enum(payoutMethods), payoutDetails: z.string().min(4).max(300) })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.user.role, ["tester"]);
+      const db = dbOrFail();
+      const [profile] = await db.select({ userId: testerProfiles.userId }).from(testerProfiles).where(and(eq(testerProfiles.userId, ctx.user.id), isNotNull(testerProfiles.completedAt))).limit(1);
+      if (!profile) fail("أكمل إعداد ملف المختبر أولاً قبل تعديل إعدادات الدفع.", "FORBIDDEN");
+      await db.update(testerProfiles).set({ payoutMethod: input.payoutMethod, payoutDetails: input.payoutDetails }).where(eq(testerProfiles.userId, ctx.user.id));
+      return { success: true };
     }),
     applyToCycle: protectedProcedure.input(z.object({ testCycleId: uuid })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
@@ -141,12 +150,21 @@ export const appRouter = router({
         if (attachmentIds.length) await tx.update(bugAttachments).set({ bugReportId: created.id }).where(and(inArray(bugAttachments.id, attachmentIds), eq(bugAttachments.uploadedBy, ctx.user.id), sql`${bugAttachments.bugReportId} is null`));
         return created.id;
       });
+      // Notify all active TTLs for this cycle that a new report was submitted
+      const cycleTitle = input.title;
+      const assignedTtls = await db.select({ testerId: testCycleTtls.testerId }).from(testCycleTtls)
+        .where(and(eq(testCycleTtls.testCycleId, input.testCycleId), isNull(testCycleTtls.revokedAt)));
+      await Promise.all(assignedTtls.map(ttl => notify(ttl.testerId, "تقرير جديد يحتاج مراجعتك", `تقرير جديد: «${cycleTitle}» بانتظار قرارك.`, "bug_report", bugId).catch(() => {})));
       return { success: true, bugId, message: "تم إرسال تقرير الخطأ وبات بانتظار مراجعة قائد فريق الاختبار." };
     }),
-    uploadEvidence: protectedProcedure.input(z.object({ filename: z.string().min(1).max(180), mimeType: z.enum(["image/png", "image/jpeg", "video/mp4", "text/plain", "application/zip"]), base64: z.string().min(4).max(16_000_000) })).mutation(async ({ ctx, input }) => {
+    uploadEvidence: protectedProcedure.input(z.object({ filename: z.string().min(1).max(180), mimeType: z.enum(["image/png", "image/jpeg", "video/mp4", "text/plain", "application/zip"]), base64: z.string().min(4).max(68_000_000) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
       const raw = Buffer.from(input.base64.replace(/^data:[^;]+;base64,/, ""), "base64");
-      if (!raw.length || raw.length > 10 * 1024 * 1024) fail("يجب ألا يتجاوز حجم الملف 10 ميغابايت.");
+      const maxBytes = input.mimeType === "video/mp4" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (!raw.length || raw.length > maxBytes) {
+        const limitLabel = input.mimeType === "video/mp4" ? "50" : "10";
+        fail(`يجب ألا يتجاوز حجم الملف ${limitLabel} ميغابايت.`);
+      }
       const safeName = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
       const key = `private/${ctx.user.id}/${crypto.randomUUID()}-${safeName}`;
       await storagePut(key, raw, input.mimeType);
@@ -187,11 +205,26 @@ export const appRouter = router({
       });
       return { success: true, cycleId };
     }),
-    eligibleTesters: protectedProcedure.query(async ({ ctx }) => {
+    eligibleTesters: protectedProcedure.input(z.object({ deviceType: z.enum(["mobile", "desktop", "tablet"]).optional(), osName: z.enum(["android", "ios", "windows", "macos", "linux"]).optional(), country: z.string().max(80).optional() }).optional()).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["client"]);
-      return dbOrFail().select({ id: profiles.id, name: profiles.name, email: profiles.email, reputationScore: testerProfiles.reputationScore, country: testerProfiles.country })
+      const db = dbOrFail();
+      const filters = input ?? {};
+      // Build device sub-query filter if device-related filters are present
+      if (filters.deviceType || filters.osName) {
+        const deviceConditions = [eq(testerDevices.testerId, profiles.id)];
+        if (filters.deviceType) deviceConditions.push(eq(testerDevices.deviceType, filters.deviceType));
+        if (filters.osName) deviceConditions.push(eq(testerDevices.osName, filters.osName));
+        const profileConditions = [eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt)];
+        if (filters.country) profileConditions.push(eq(testerProfiles.country, filters.country));
+        return db.selectDistinct({ id: profiles.id, name: profiles.name, email: profiles.email, reputationScore: testerProfiles.reputationScore, country: testerProfiles.country })
+          .from(profiles).innerJoin(testerProfiles, eq(testerProfiles.userId, profiles.id)).innerJoin(testerDevices, and(...deviceConditions))
+          .where(and(...profileConditions)).orderBy(desc(testerProfiles.reputationScore));
+      }
+      const profileConditions = [eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt)];
+      if (filters.country) profileConditions.push(eq(testerProfiles.country, filters.country));
+      return db.select({ id: profiles.id, name: profiles.name, email: profiles.email, reputationScore: testerProfiles.reputationScore, country: testerProfiles.country })
         .from(profiles).innerJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
-        .where(and(eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt))).orderBy(desc(testerProfiles.reputationScore));
+        .where(and(...profileConditions)).orderBy(desc(testerProfiles.reputationScore));
     }),
     inviteTester: protectedProcedure.input(z.object({ testCycleId: uuid, testerId: uuid.optional(), testerEmail: z.string().email().max(320).optional() }).refine((value) => Boolean(value.testerId || value.testerEmail), "أدخل بريد المختبر أو اختره من القائمة.")).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["client"]);
@@ -203,6 +236,8 @@ export const appRouter = router({
       const [existing] = await db.select().from(testCycleInvitations).where(and(eq(testCycleInvitations.testCycleId, input.testCycleId), eq(testCycleInvitations.testerId, tester.id))).limit(1);
       if (existing) await db.update(testCycleInvitations).set({ invitedBy: ctx.user.id, status: "pending", respondedAt: null }).where(eq(testCycleInvitations.id, existing.id));
       else await db.insert(testCycleInvitations).values({ testCycleId: input.testCycleId, testerId: tester.id, invitedBy: ctx.user.id });
+      const [invitedCycle] = await db.select({ title: testCycles.title }).from(testCycles).where(eq(testCycles.id, input.testCycleId)).limit(1);
+      await notify(tester.id, "دعوة للانضمام إلى دورة اختبار", `تمت دعوتك للتقدم إلى دورة الاختبار: ${invitedCycle?.title ?? ""}. يمكنك تقديم طلبك من مساحة العمل.`, "test_cycle_application", input.testCycleId).catch(() => {});
       return { success: true };
     }),
     cycleApplications: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
@@ -223,6 +258,18 @@ export const appRouter = router({
       await db.update(testCycleApplications).set({ status: input.decision, decidedBy: ctx.user.id, decidedAt: new Date(), decisionReason: input.decision === "rejected" ? input.reason : null }).where(eq(testCycleApplications.id, application.id));
       await notify(application.testerId, input.decision === "accepted" ? "تم قبول طلب انضمامك" : "تم رفض طلب انضمامك", input.decision === "accepted" ? "أصبحت مؤهلاً لإرسال تقارير في دورة الاختبار." : `سبب الرفض: ${input.reason}`, "test_cycle_application", application.id);
       return { success: true };
+    }),
+    updateCycleStatus: protectedProcedure.input(z.object({ testCycleId: uuid, status: z.enum(["active", "completed"]) })).mutation(async ({ ctx, input }) => {
+      requireRole(ctx.user.role, ["client"]);
+      const db = dbOrFail();
+      const [cycle] = await db.select({ id: testCycles.id, status: testCycles.status, projectId: testCycles.projectId })
+        .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId))
+        .where(and(eq(testCycles.id, input.testCycleId), eq(projects.clientId, ctx.user.id))).limit(1);
+      if (!cycle) fail("دورة الاختبار غير متاحة ضمن مشاريعك.", "FORBIDDEN");
+      const allowed: Record<string, string[]> = { draft: ["active"], in_review: ["completed"] };
+      if (!allowed[cycle.status]?.includes(input.status)) fail(`لا يمكن تحويل حالة الدورة من «${cycle.status}» إلى «${input.status}».`, "BAD_REQUEST");
+      await db.update(testCycles).set({ status: input.status }).where(eq(testCycles.id, cycle.id));
+      return { success: true, status: input.status };
     }),
   }),
   ttl: router({
@@ -255,12 +302,15 @@ export const appRouter = router({
         .from(testCycleApplications).innerJoin(profiles, eq(profiles.id, testCycleApplications.testerId)).leftJoin(testerProfiles, eq(testerProfiles.userId, profiles.id))
         .where(eq(testCycleApplications.testCycleId, input.testCycleId)).orderBy(desc(testCycleApplications.appliedAt));
     }),
-    reviewBug: protectedProcedure.input(z.discriminatedUnion("action", [z.object({ bugId: uuid, action: z.literal("accepted") }), z.object({ bugId: uuid, action: z.literal("rejected"), reason: z.string().min(12).max(2000) }), z.object({ bugId: uuid, action: z.literal("request_information"), reason: z.string().min(12).max(2000) })])).mutation(async ({ ctx, input }) => {
+    reviewBug: protectedProcedure.input(z.discriminatedUnion("action", [z.object({ bugId: uuid, action: z.literal("accepted") }), z.object({ bugId: uuid, action: z.literal("rejected"), reason: z.string().min(12).max(2000) }), z.object({ bugId: uuid, action: z.literal("request_information"), reason: z.string().min(12).max(2000) }), z.object({ bugId: uuid, action: z.literal("mark_duplicate"), originalBugId: uuid, reason: z.string().min(12).max(2000) })])).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
       const db = dbOrFail();
       const bug = await getBug(input.bugId);
       if (!(await isActiveCycleTtl(ctx.user.id, bug.testCycleId))) fail("لست قائد فريق الاختبار المعيّن لهذه الدورة.", "FORBIDDEN");
       if (bug.status !== "pending") fail("تم اتخاذ قرار نهائي في هذا التقرير.", "CONFLICT");
+      // Gate: TTL cannot review after cycle end date
+      const [activeCycle] = await db.select({ id: testCycles.id }).from(testCycles).where(and(eq(testCycles.id, bug.testCycleId), sql`${testCycles.endAt} >= now()`)).limit(1);
+      if (!activeCycle) fail("انتهى وقت دورة الاختبار ولا يمكن مراجعة التقارير بعد انتهائها.", "FORBIDDEN");
       await db.transaction(async tx => {
         const [current] = await tx.select().from(bugReports).where(eq(bugReports.id, bug.id)).limit(1);
         const [assignment] = await tx.select({ id: testCycleTtls.id }).from(testCycleTtls).where(and(eq(testCycleTtls.testCycleId, bug.testCycleId), eq(testCycleTtls.testerId, ctx.user.id), isNull(testCycleTtls.revokedAt))).limit(1);
@@ -268,6 +318,15 @@ export const appRouter = router({
         if (input.action === "request_information") {
           await tx.update(bugReports).set({ requestChangesReason: input.reason, reviewedBy: ctx.user.id, reviewedAt: new Date(), updatedAt: new Date() }).where(eq(bugReports.id, bug.id));
           await tx.insert(bugReportEvents).values({ bugReportId: bug.id, actorId: ctx.user.id, type: "information_requested", message: input.reason });
+          return;
+        }
+        if (input.action === "mark_duplicate") {
+          // Validate that the original bug is in the same test cycle
+          const [originalBug] = await tx.select({ id: bugReports.id }).from(bugReports).where(and(eq(bugReports.id, input.originalBugId), eq(bugReports.testCycleId, bug.testCycleId))).limit(1);
+          if (!originalBug) fail("التقرير الأصلي المرجعي غير موجود في نفس دورة الاختبار.", "NOT_FOUND");
+          if (input.originalBugId === bug.id) fail("لا يمكن تحديد التقرير كتكرار لنفسه.", "BAD_REQUEST");
+          await tx.update(bugReports).set({ status: "rejected", rejectionReason: input.reason, reviewedBy: ctx.user.id, reviewedAt: new Date(), updatedAt: new Date() }).where(eq(bugReports.id, bug.id));
+          await tx.insert(bugReportEvents).values({ bugReportId: bug.id, actorId: ctx.user.id, type: "duplicate", message: `تكرار للتقرير: ${input.originalBugId}. ${input.reason}` });
           return;
         }
         if (input.action === "rejected") {
@@ -287,8 +346,11 @@ export const appRouter = router({
         await tx.insert(reputationEvents).values({ testerId: bug.testerId, bugReportId: bug.id, points: 10, reason: "تقرير تم قبوله من قائد فريق الاختبار" });
         await tx.update(testerProfiles).set({ reputationScore: sql`${testerProfiles.reputationScore} + 10` }).where(eq(testerProfiles.userId, bug.testerId));
       });
-      await notifyReportReviewerOutcome(bug.testerId, bug.id, bug.title, input.action === "request_information" ? "information_requested" : input.action, input.action === "accepted" ? undefined : input.reason);
-      return { success: true, status: input.action === "request_information" ? "pending" as const : input.action };
+      const notifyOutcome = input.action === "request_information" ? "information_requested" : input.action === "mark_duplicate" ? "rejected" : input.action;
+      const notifyReason = input.action === "accepted" ? undefined : "reason" in input ? input.reason : undefined;
+      await notifyReportReviewerOutcome(bug.testerId, bug.id, bug.title, notifyOutcome, notifyReason);
+      const resultStatus = input.action === "request_information" ? "pending" as const : input.action === "mark_duplicate" ? "rejected" as const : input.action;
+      return { success: true, status: resultStatus };
     }),
     decideApplication: protectedProcedure.input(z.discriminatedUnion("decision", [z.object({ applicationId: uuid, decision: z.literal("accepted") }), z.object({ applicationId: uuid, decision: z.literal("rejected"), reason: z.string().min(12).max(2000) })])).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
@@ -318,11 +380,14 @@ export const appRouter = router({
         .where(and(eq(profiles.id, input.testerId), eq(profiles.role, "tester"), isNotNull(testerProfiles.completedAt))).limit(1);
       if (!tester) fail("يمكن تعيين مختبر مكتمل الملف فقط قائداً لفريق الاختبار.", "NOT_FOUND");
       const [existing] = await db.select().from(testCycleTtls).where(and(eq(testCycleTtls.testCycleId, input.testCycleId), eq(testCycleTtls.testerId, input.testerId))).limit(1);
+      const [cycleInfo] = await db.select({ title: testCycles.title }).from(testCycles).where(eq(testCycles.id, input.testCycleId)).limit(1);
       if (input.assign) {
         if (existing) await db.update(testCycleTtls).set({ assignedBy: ctx.user.id, assignedAt: new Date(), revokedAt: null }).where(eq(testCycleTtls.id, existing.id));
         else await db.insert(testCycleTtls).values({ testCycleId: input.testCycleId, testerId: input.testerId, assignedBy: ctx.user.id });
+        await notify(input.testerId, "تم تعيينك قائداً لفريق الاختبار", `أنت الآن قائد فريق الاختبار في دورة: «${cycleInfo?.title ?? ""}». يمكنك مراجعة التقارير من قسم قيادة الاختبار.`, "system", input.testCycleId).catch(() => {});
       } else if (existing) {
         await db.update(testCycleTtls).set({ revokedAt: new Date() }).where(eq(testCycleTtls.id, existing.id));
+        await notify(input.testerId, "تم إلغاء تعيينك كقائد للاختبار", `تم إلغاء دورك كقائد فريق الاختبار في دورة: «${cycleInfo?.title ?? ""}».`, "system", input.testCycleId).catch(() => {});
       }
       return { success: true };
     }),
