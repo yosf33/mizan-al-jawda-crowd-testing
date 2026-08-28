@@ -1,0 +1,42 @@
+{
+  "mcpServers": {
+    "chaosengine-memory": {
+      "args": [
+        ".chaos-engine/tool.py",
+        "memory-mcp"
+      ],
+      "argsWindows": [
+        ".chaos-engine/tool.py",
+        "memory-mcp"
+      ],
+      "command": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "commandWindows": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "cwd": "."
+    },
+    "chaosengine-mempalace": {
+      "args": [
+        ".chaos-engine/tool.py",
+        "mempalace-mcp",
+        "--palace",
+        ".chaos-engine-state/mempalace",
+        "--backend",
+        "sqlite_exact"
+      ],
+      "argsWindows": [
+        ".chaos-engine/tool.py",
+        "mempalace-mcp",
+        "--palace",
+        ".chaos-engine-state/mempalace",
+        "--backend",
+        "sqlite_exact"
+      ],
+      "command": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "commandWindows": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "cwd": ".",
+      "env": {
+        "MEMPALACE_BACKEND": "sqlite_exact",
+        "MEMPALACE_EMBEDDING_MODEL": "minilm"
+      }
+    }
+  }
+}

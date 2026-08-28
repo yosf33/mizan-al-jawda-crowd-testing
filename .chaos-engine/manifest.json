@@ -1,0 +1,178 @@
+{
+  "capabilities": {
+    "core": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "graphify": {
+      "lifecycle": "derived-single-writer",
+      "owner": "project",
+      "scope": "repository",
+      "taskImpact": "advisory"
+    },
+    "hooks": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "maven-tools-mcp": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "user",
+      "taskImpact": "optional"
+    },
+    "mcps": {
+      "lifecycle": "receipt-owned",
+      "owner": "project",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "memory": {
+      "lifecycle": "persistent-data",
+      "owner": "project",
+      "scope": "project",
+      "taskImpact": "advisory"
+    },
+    "mempalace": {
+      "lifecycle": "persistent-data",
+      "owner": "project",
+      "scope": "project",
+      "taskImpact": "advisory"
+    },
+    "playbooks": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "repository",
+      "taskImpact": "required"
+    },
+    "plugins": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "projection-policy": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "retrieval-config": {
+      "lifecycle": "persistent-data",
+      "owner": "project",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "roles": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "skills": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    },
+    "tools": {
+      "lifecycle": "receipt-owned",
+      "owner": "installer",
+      "scope": "project",
+      "taskImpact": "required"
+    }
+  },
+  "capabilityPolicySha256": "1004a1eb8687a750cde4e073c187b8d8145190a4ea0ab6f9d4fc74a21ef81f2a",
+  "distribution": {
+    "id": "portable",
+    "policySha256": "2c40ddec8069e22890c372e0244e4e04c4dc4ebc1ad858a6891e244b4124ffd9"
+  },
+  "files": {
+    "INSTALL.md": "a3fdc9bf2266c433fdbf40f4a26f6ff21126967c8653a85faa2d7d4b5f960737",
+    "LICENSE": "78c39f57ad52763b633dc3cb3aec52b2093a09efb748b0056b40c478aa73d913",
+    "THIRD_PARTY_NOTICES.md": "ccd7ead70ca963cbab652f1100754a18a29370a9d960f637875d46f80aca98cb",
+    "assets/memory-v5/SCHEMAS.md": "ba09c9c5d9ad851f8a47c3adf64d2b9101daa8be6273622c240c6cdb6ca9b909",
+    "assets/memory-v5/config.schema.json": "80607cbb359e9da8db14f22386f2667f67ca7509fe7457a0daea84cb69f90e4a",
+    "assets/memory-v5/event.schema.json": "274ea04c893e2e29bc00e6b7239c58723de682ce2fff3b6ae41384d05633da9d",
+    "assets/memory-v5/object.schema.json": "b976a1f36132b83e7b04b0cac6beab9f1aa9c22a6d484be36c94e6c624cc661d",
+    "assets/memory-v5/patch.schema.json": "9d8ea4bfd6cd697b58a2eb88056b970b081d12b355032b46aac66c56ed462712",
+    "assets/memory-v5/relation.schema.json": "5da3f2fb69015f019b916a15caa7a699fc0160559dfd31d71b7f15d30c4b3e3f",
+    "bootstrap.py": "d14c89da43eef967d324536c75ef905b776e64dada082890b4995e8e62abc1d5",
+    "dependencies.json": "d769cb5b916ac325167d4c7df242d6e24a7c51677124efb30cf804ccb99052e9",
+    "dependencies.py": "468d99639515d246e88436052f48771272cd9159ea9d69287d99194fbc23b65e",
+    "hooks/guard.py": "3cfb7ded164b8d2c18dd5aa38992497cec2e86b324645cbeb26b05212c8d7392",
+    "hooks/kernel.py": "279ad8fca3e60b3bfb71a981faaaeb205569f9ab7eadbf8b67500271c1118c31",
+    "hooks/launch.js": "697ede00485da25ec520fa5d9eda67335cd81ab497ce106a187913ac709d1d64",
+    "hooks/lifecycle.py": "d45e284da48932a000fb9445735412276db699cd0c777753ab9ee2b384b6e4a4",
+    "hooks/matchers.json": "f89852f0b0cf85b600bfc15bca39a7c69b1c23fa49bfb8820c7d52e6d7b63005",
+    "hooks/reflection.py": "ba7309fb45f503463c54a5b6b08b0ddc5814217cf0aa36ad0a74ffae85515ba5",
+    "hosts.py": "f9f782fad20eccb14736a017f3ae8715a12e08ed6344b69a2d9365d2717e99d6",
+    "install.ps1": "cf9ed424563247ef3c31d4546553f3ab6d79010aefa0e843330416c5473320a0",
+    "install.py": "e9b5b15c728dcef5256a24f75303b0cd4695657972fa72ca8ea9c8785aaf134b",
+    "install.sh": "c2611b3f0b26b8096e11a94b7dc486f9e963d9d7e86f68dfc3502229328cc0bf",
+    "learning.py": "26798ad1f59091e21a2fbb76fc78562b150270cc1aed6a0d1d6afbd6b652cb30",
+    "profiles/README.md": "b5b2087b798731d1ac1d339fbfe0ec68e051cdf3c168b77ecd9b0e2b92a0c991",
+    "profiles/portable/entrypoint.md": "7aa0a77d7756e933f8dce7bd633d03141cc6ee92672db65c983d5abfaaf63c65",
+    "profiles/portable/profile.json": "e21e3c97106717e5212857079f4760cfd96d65926e453e6a1e1ba2f1eae97c82",
+    "profiles/portable/references/routing.md": "765c146ccf202761883d99a90e83da37b487af5840ae3c1d3dbb1395c6a19517",
+    "references/caveman.LICENSE": "5eb826cd03151bcc7cce3f80d40e87733237fedfc6c36d6908aca5fd650a0bdb",
+    "references/cleanup-scopes.md": "ddde0ca01423d701ec07e154782585f5a2cbc6f981c9149edb70f645e1cf9f45",
+    "references/consult-first.md": "23b69a1c4277fbee58c966bb2661f286776e2d2d610e7444563f0e603f51d345",
+    "references/context-economy.md": "2f6ef12c2b4366773d14af0e9257896e46ce1d28916fa80c68ef91ba9779ba9a",
+    "references/delegation.md": "6b7757cd949b2b90d0c3e533f2c1f908a8a0ada2605975ee4c30143cf60b11ac",
+    "references/ethical-conduct.md": "f0960dc44ed8f2d57364d41bb6535e7264dc885e13c2d8d5ff0049d262119341",
+    "references/graphify.md": "e2d37a34a375766ee064c00cc8ce1aed5177f29fca849153c65afeebd87568e3",
+    "references/heuristics.md": "a2ea79cc3094a51188a70a381fbf5fea23886afe3578f4c48724bd674407c97c",
+    "references/lifecycle-hooks.md": "af9ffae35160fe97f55bb1719a2350c8f8871bdb48060072bf0d8453bef417d8",
+    "references/orchestrator-bootstrap.md": "83df885572d923465eaf662f5bcd96a2b9b3ff00aebe3f6f8dd24afc865b33ea",
+    "references/ponytail.LICENSE": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab",
+    "references/reflection-checkpoints.md": "2e8c3da796c90745e3c87537ddfbe81300e3f00e95fb5114487d9513f1af9139",
+    "references/research-receipt.md": "0a8be364faae27e16d15b85b74f8a6dc1b81782b8dbae75e35ebe26725a7277b",
+    "references/retrieve-first.md": "68dc6c587131eea502fff073f0de058e1fce5894a67b296fa7c5e683c0684dbe",
+    "references/roles.md": "962876cee01ecafcf29fd21f5b68a680dfc351b66b46f0cf07d0029838331a01",
+    "references/script-first.md": "d6e39468d1100161a11fb9bbe262b9208eade6f0a7a94175da33e5f0a7de653b",
+    "references/task-isolation.md": "d59b1a3002384ef57783ee0168ebd459ba021b64bacebd0a1bca7901712efd08",
+    "references/tdd-failure-modes.md": "a023c52527cde8f5ab334201e96182c167838bdf0a623815a590cea69e610182",
+    "references/tdd.md": "b2516007673083fd1d20eeffd498a36e587a2d6129c770cf4a119af6158f2f3b",
+    "references/test-driven-development.LICENSE": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+    "references/verification-gap-lens.md": "622789db1917d9a9cf891ee25713c1ef7ba98534cee3656f21dfd802e9754f78",
+    "references/work-github-planning.md": "f05ddd052eaba3587d250f800007d663a7cdbf1f1220e6524624dbb17d0c70c1",
+    "references/work-github-playbook.md": "99388f7816e2303bd22a5ecaa48322575a95b9caecfd32618a46f30195a0cada",
+    "references/work-item-adapters.md": "7816b629b168781b7fc1e9b2abc376f2aeab907d779009adce3ae4928efb80bf",
+    "references/work-item.md": "d061f9d79d3e2f1ccf62ff78dd0933e560b58b3539c3f11c4be287ab419dcc89",
+    "skills/chaos-engine/SKILL.md": "8fa3fabb82994d3f4172bf7d7ba638b23dee712114db9f959d3b99ed8282738b",
+    "skills/local-coding-delegate/SKILL.md": "9bb5740c1927a8906885e63fad48a057b2db3cafb23488ce741a36f39af0d15c",
+    "skills/local-coding-delegate/scripts/probe_hardware.py": "b5e9b9ea6952f09a542a2522f2fa53300c2739b9ce706c85c2b21657d49d5df8",
+    "skills/work-item/SKILL.md": "15dd0993c97cbb488ce748cd84f126deb584c8ee78fa1f92403d23a6905f5d03",
+    "tool.py": "281d4549be3d033ff68fd26f49bb82b62a32398b98817a7df165d539f06a1d33",
+    "vendor/caveman/INVENTORY.md": "4d7542a4972c953797815aa965a70c2089619129b1465b6e4abbe13f598a9286",
+    "vendor/caveman/LICENSE": "f0abc56b6f49ab2e285bb6e6723f028abb7ebd4fe0e242bbdc2b4dded0ace8b9",
+    "vendor/caveman/PIN.json": "1fe745ee966f3ce936d69458639fc3602e701812a6d290767c492dac3634ef1b",
+    "vendor/caveman/skills/caveman/SKILL.md": "1eddf7055618153869975678d9ff36635602a3aa333f8b4cc0787f12de75b6f8",
+    "vendor/caveman/src/hooks/caveman-activate.js": "b4ced6061e11f2f8077ba6f28c4b390cbee72efd3a6151c62ca9bef56f07c670",
+    "vendor/caveman/src/hooks/caveman-config.js": "6c0f359b4706cc57bcbb6f28cbdd9a82dfaa0135b5b7a23b794999c732335eca",
+    "vendor/caveman/src/hooks/caveman-mode-tracker.js": "873cb1fe7107a2b45eafc701a67fe6efe3cc7160a762c09ab0052dc74e64593d",
+    "vendor/caveman/src/hooks/caveman-parse.js": "a25af414462980df2fe8aab96bb3dbaae38c9c945cb7028214ed440cc826b7f6",
+    "vendor/caveman/src/hooks/package.json": "8005a3491db7d92f36ac66369861589f9c47123d3a7c71e643fc2c06168cd45a",
+    "vendor/ponytail/INVENTORY.md": "9fcb71c84221475b6a001f33c657974330c9ec0260f6c6a012154254986e11b2",
+    "vendor/ponytail/LICENSE": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab",
+    "vendor/ponytail/PIN.json": "1ac8e91f6489059451cd97210ab9065cfe51d7a7f5f6a953ea86d67844186064",
+    "vendor/ponytail/hooks/claude-codex-hooks.json": "25f1af0c65db50fcc3b7c7e7535144a3ce2303d79c1a83feedf31bc4ce8673b1",
+    "vendor/ponytail/hooks/ponytail-activate.js": "1c428c4ee9687c2f4321924109ee92e8f8b06fd6600cb6be9ec5b59633cafab1",
+    "vendor/ponytail/hooks/ponytail-config.js": "0a8daf96cf9ac703dc4cb7b5065253567e513c951d60b8eb94a0fe727514aeca",
+    "vendor/ponytail/hooks/ponytail-instructions.js": "23c050103f28dbe6bad953ae21d98cd06d720a20f33d4716e9de419f947d495e",
+    "vendor/ponytail/hooks/ponytail-mode-tracker.js": "5d1a960ff01b73f651ec0242052a8cf1e064cb88147806bf6e13f92798aca251",
+    "vendor/ponytail/hooks/ponytail-runtime.js": "02fa6127cf6c4b65a7b07b66541677ea587a0691802b6d1d2be2419bccea9110",
+    "vendor/ponytail/hooks/ponytail-subagent.js": "7f6bee86702a488d29ef0dcaabf424bbe2aca345a6a642319d43a1fe0276792e",
+    "vendor/ponytail/skills/ponytail/SKILL.md": "1316a2f3f95741d2300b116fe0c2d81ce4a9568656ed0a62643f54aaf09957f2"
+  },
+  "hostToken": "0841f73f0f99072116b2c4715f7769fe2d8a20fc97aaca927f4c33e9c92e36f9",
+  "schemaVersion": 1,
+  "source": {
+    "commit": "3a277e066878b6177a1af540af2ae260f38abc02",
+    "kind": "local"
+  }
+}

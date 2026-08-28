@@ -1,0 +1,77 @@
+{
+  "hooks": {
+    "agentStop": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "postToolUse": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "preCompact": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "preToolUse": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "sessionStart": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "subagentStop": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "bash": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "powershell": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js copilot",
+        "timeoutSec": 30,
+        "type": "command"
+      }
+    ]
+  },
+  "version": 1
+}

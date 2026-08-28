@@ -133,7 +133,12 @@ export async function dashboardFor(role: string, userId: string) {
   if (role === "client") {
     const ownedProjects = await db.select().from(projects).where(eq(projects.clientId, userId)).orderBy(desc(projects.createdAt));
     const projectIds = ownedProjects.map(project => project.id);
-    const cycles = projectIds.length ? await db.select().from(testCycles).where(inArray(testCycles.projectId, projectIds)).orderBy(desc(testCycles.createdAt)) : [];
+    const rawCycles = projectIds.length ? await db.select().from(testCycles).where(inArray(testCycles.projectId, projectIds)).orderBy(desc(testCycles.createdAt)) : [];
+    const nowTime = new Date();
+    const cycles = rawCycles.map(c => ({
+      ...c,
+      status: (c.status === "active" && c.endAt < nowTime) ? "completed" as const : c.status
+    }));
     const cycleIds = cycles.map(cycle => cycle.id);
     const acceptedReports = cycleIds.length ? await db.select().from(bugReports).where(and(inArray(bugReports.testCycleId, cycleIds), eq(bugReports.status, "accepted"))).orderBy(desc(bugReports.createdAt)) : [];
     const reportEvents = acceptedReports.length ? await db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, acceptedReports.map(report => report.id))).orderBy(bugReportEvents.createdAt) : [];
@@ -142,8 +147,15 @@ export async function dashboardFor(role: string, userId: string) {
   }
 
   if (role === "community_manager") {
-    const cycles = await db.select({ id: testCycles.id, title: testCycles.title, status: testCycles.status, projectName: projects.name })
+    const rawCycles = await db.select({ id: testCycles.id, title: testCycles.title, status: testCycles.status, endAt: testCycles.endAt, projectName: projects.name })
       .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId)).orderBy(desc(testCycles.createdAt));
+    const nowTime = new Date();
+    const cycles = rawCycles.map(c => ({
+      id: c.id,
+      title: c.title,
+      projectName: c.projectName,
+      status: (c.status === "active" && c.endAt < nowTime) ? "completed" as const : c.status
+    }));
     const pendingPayouts = await db.select({ id: payoutRequests.id, testerId: payoutRequests.testerId, testerName: profiles.name, testerEmail: profiles.email, amount: payoutRequests.amount, method: payoutRequests.method, paymentTargetInfo: payoutRequests.paymentTargetInfo, status: payoutRequests.status, processingNote: payoutRequests.processingNote, requestedAt: payoutRequests.requestedAt, processedAt: payoutRequests.processedAt })
       .from(payoutRequests).innerJoin(profiles, eq(profiles.id, payoutRequests.testerId)).where(eq(payoutRequests.status, "pending")).orderBy(desc(payoutRequests.requestedAt));
     const transactionsHistory = await db.select({ id: transactions.id, amount: transactions.amount, type: transactions.type, referenceType: transactions.referenceType, referenceId: transactions.referenceId, note: transactions.note, createdAt: transactions.createdAt, testerId: profiles.id, testerName: profiles.name, testerEmail: profiles.email })

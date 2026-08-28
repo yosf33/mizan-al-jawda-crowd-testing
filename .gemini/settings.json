@@ -1,0 +1,130 @@
+{
+  "hooks": {
+    "AfterAgent": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|PowerShell|shell_command|exec_command|functions[.]exec|run_shell_command|run_in_terminal|Write|Edit|NotebookEdit|apply_patch|write_file|create_file|edit_file|replace|replace_string_in_file|multi_replace_string_in_file|mcp__[^|]*memory__(?:remember_memory|save_memory_patch)|mcp__mempalace__mempalace_(?:add_drawer|checkpoint|create_tunnel|delete_by_source|delete_drawer|delete_hallway|delete_tunnel|diary_write|kg_(?:add|invalidate|supersede)|mine|sync|update_drawer)"
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ],
+        "matcher": "Task|Agent|spawn_agent|collaboration[.]spawn_agent|task|agent|Bash|PowerShell|shell_command|exec_command|functions[.]exec|run_shell_command|run_in_terminal|Write|Edit|NotebookEdit|apply_patch|write_file|create_file|edit_file|replace|replace_string_in_file|multi_replace_string_in_file|store|mcp__[^|]*memory__(?:remember_memory|save_memory_patch)|mcp__mempalace__mempalace_(?:add_drawer|checkpoint|create_tunnel|delete_by_source|delete_drawer|delete_hallway|delete_tunnel|diary_write|kg_(?:add|invalidate|supersede)|mine|sync|update_drawer)"
+      }
+    ],
+    "PreCompress": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/node/bin/node\" .chaos-engine/hooks/launch.js gemini",
+            "name": "ChaosEngine lifecycle",
+            "timeout": 30000,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "chaosengine-memory": {
+      "args": [
+        ".chaos-engine/tool.py",
+        "memory-mcp"
+      ],
+      "argsWindows": [
+        ".chaos-engine/tool.py",
+        "memory-mcp"
+      ],
+      "command": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "commandWindows": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "cwd": "."
+    },
+    "chaosengine-mempalace": {
+      "args": [
+        ".chaos-engine/tool.py",
+        "mempalace-mcp",
+        "--palace",
+        ".chaos-engine-state/mempalace",
+        "--backend",
+        "sqlite_exact"
+      ],
+      "argsWindows": [
+        ".chaos-engine/tool.py",
+        "mempalace-mcp",
+        "--palace",
+        ".chaos-engine-state/mempalace",
+        "--backend",
+        "sqlite_exact"
+      ],
+      "command": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "commandWindows": "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python",
+      "cwd": ".",
+      "env": {
+        "MEMPALACE_BACKEND": "sqlite_exact",
+        "MEMPALACE_EMBEDDING_MODEL": "minilm"
+      }
+    }
+  }
+}

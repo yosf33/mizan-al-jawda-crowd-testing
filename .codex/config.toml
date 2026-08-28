@@ -1,0 +1,16 @@
+# CHAOSENGINE:START
+[mcp_servers."chaosengine-memory"]
+command = "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python"
+args = [".chaos-engine/tool.py", "memory-mcp"]
+commandWindows = "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python"
+argsWindows = [".chaos-engine/tool.py", "memory-mcp"]
+cwd = ".."
+
+[mcp_servers."chaosengine-mempalace"]
+command = "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python"
+args = [".chaos-engine/tool.py", "mempalace-mcp", "--palace", ".chaos-engine-state/mempalace", "--backend", "sqlite_exact"]
+commandWindows = "/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python"
+argsWindows = [".chaos-engine/tool.py", "mempalace-mcp", "--palace", ".chaos-engine-state/mempalace", "--backend", "sqlite_exact"]
+cwd = ".."
+env = { MEMPALACE_EMBEDDING_MODEL = "minilm", MEMPALACE_BACKEND = "sqlite_exact" }
+# CHAOSENGINE:END

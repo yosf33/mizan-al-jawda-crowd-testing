@@ -1,0 +1,11 @@
+wing: mizan_al_jawda_crowd_testing_main
+rooms:
+  - name: general
+    description: Project source and documentation
+    keywords: [project, source, documentation]
+exclude_patterns:
+  - mempalace.yaml
+  - .memory/**
+  - graphify-out/**
+  - .chaos-engine-runtime/**
+  - .chaos-engine-state/**

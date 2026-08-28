@@ -1,0 +1,128 @@
+{
+  "enabledPlugins": {
+    "caveman@chaos-engine-project": true,
+    "chaos-engine@chaos-engine-project": true,
+    "ponytail@chaos-engine-project": true
+  },
+  "extraKnownMarketplaces": {
+    "chaos-engine-project": {
+      "source": {
+        "path": ".",
+        "source": "directory"
+      }
+    }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|PowerShell|shell_command|exec_command|functions[.]exec|run_shell_command|run_in_terminal|Write|Edit|NotebookEdit|apply_patch|write_file|create_file|edit_file|replace|replace_string_in_file|multi_replace_string_in_file|mcp__[^|]*memory__(?:remember_memory|save_memory_patch)|mcp__mempalace__mempalace_(?:add_drawer|checkpoint|create_tunnel|delete_by_source|delete_drawer|delete_hallway|delete_tunnel|diary_write|kg_(?:add|invalidate|supersede)|mine|sync|update_drawer)"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|PowerShell|shell_command|exec_command|functions[.]exec|run_shell_command|run_in_terminal|Write|Edit|NotebookEdit|apply_patch|write_file|create_file|edit_file|replace|replace_string_in_file|multi_replace_string_in_file|mcp__[^|]*memory__(?:remember_memory|save_memory_patch)|mcp__mempalace__mempalace_(?:add_drawer|checkpoint|create_tunnel|delete_by_source|delete_drawer|delete_hallway|delete_tunnel|diary_write|kg_(?:add|invalidate|supersede)|mine|sync|update_drawer)"
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "Task|Agent|spawn_agent|collaboration[.]spawn_agent|task|agent|Bash|PowerShell|shell_command|exec_command|functions[.]exec|run_shell_command|run_in_terminal|Write|Edit|NotebookEdit|apply_patch|write_file|create_file|edit_file|replace|replace_string_in_file|multi_replace_string_in_file|store|mcp__[^|]*memory__(?:remember_memory|save_memory_patch)|mcp__mempalace__mempalace_(?:add_drawer|checkpoint|create_tunnel|delete_by_source|delete_drawer|delete_hallway|delete_tunnel|diary_write|kg_(?:add|invalidate|supersede)|mine|sync|update_drawer)"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "commandWindows": "\"/Users/youssf/Desktop/Crowdtesting Website/mizan-al-jawda-crowd-testing/.chaos-engine-runtime-generations/68d827d72b8f6b689de332e48de864c3/uv-tools/mempalace/bin/python\" -c \"import os,pathlib,runpy;os.environ['CHAOS_ENGINE_HOST']='claude';cands=('.chaos-engine/hooks/guard.py','plugins/chaos-engine/hooks/guard.py','chaos-engine/hooks/guard.py');p=next((root/rel for root in (pathlib.Path.cwd(),*pathlib.Path.cwd().parents) for rel in cands if (root/rel).is_file()),None);runpy.run_path(str(p),run_name='__main__') if p else print('{}')\"",
+            "timeout": 30,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -115,9 +115,13 @@ export const appRouter = router({
       const [application] = await db.select({ id: testCycleApplications.id }).from(testCycleApplications)
         .where(and(eq(testCycleApplications.testCycleId, input.testCycleId), eq(testCycleApplications.testerId, ctx.user.id), eq(testCycleApplications.status, "accepted"))).limit(1);
       if (!application) fail("لا تتاح تفاصيل الدورة إلا للمختبر الذي قُبل طلب انضمامه.", "FORBIDDEN");
-      const [cycle] = await db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, outOfScope: testCycles.outOfScope, buildUrl: testCycles.buildUrl, status: testCycles.status, startAt: testCycles.startAt, endAt: testCycles.endAt, projectName: projects.name })
+      const [rawCycle] = await db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, outOfScope: testCycles.outOfScope, buildUrl: testCycles.buildUrl, status: testCycles.status, startAt: testCycles.startAt, endAt: testCycles.endAt, projectName: projects.name })
         .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId)).where(eq(testCycles.id, input.testCycleId)).limit(1);
-      if (!cycle) fail("دورة الاختبار غير موجودة.", "NOT_FOUND");
+      if (!rawCycle) fail("دورة الاختبار غير موجودة.", "NOT_FOUND");
+      const cycle = {
+        ...rawCycle,
+        status: (rawCycle.status === "active" && rawCycle.endAt < new Date()) ? "completed" as const : rawCycle.status
+      };
       const rates = await db.select({ severity: cycleBountyRates.severity, bountyAmount: cycleBountyRates.bountyAmount }).from(cycleBountyRates).where(eq(cycleBountyRates.testCycleId, input.testCycleId));
       return { ...cycle, rates };
     }),
@@ -224,9 +228,16 @@ export const appRouter = router({
   ttl: router({
     assignedCycles: protectedProcedure.query(async ({ ctx }) => {
       requireRole(ctx.user.role, ["tester"]);
-      return readV3OrFallback(() => dbOrFail().select({ id: testCycles.id, title: testCycles.title, projectName: projects.name, status: testCycles.status })
+      const rawCycles = await readV3OrFallback(() => dbOrFail().select({ id: testCycles.id, title: testCycles.title, projectName: projects.name, status: testCycles.status, endAt: testCycles.endAt })
         .from(testCycleTtls).innerJoin(testCycles, eq(testCycles.id, testCycleTtls.testCycleId)).innerJoin(projects, eq(projects.id, testCycles.projectId))
         .where(and(eq(testCycleTtls.testerId, ctx.user.id), isNull(testCycleTtls.revokedAt))).orderBy(desc(testCycles.createdAt)), []);
+      const nowTime = new Date();
+      return rawCycles.map(c => ({
+        id: c.id,
+        title: c.title,
+        projectName: c.projectName,
+        status: (c.status === "active" && c.endAt < nowTime) ? "completed" as const : c.status
+      }));
     }),
     pendingReports: protectedProcedure.input(z.object({ testCycleId: uuid })).query(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);

@@ -160,4 +160,13 @@ describe("V3 crowd-testing workflow guards", () => {
     expect(dashboardSource).toContain('testerEmail: profiles.email');
     expect(dashboardSource).toContain('from(transactions).innerJoin(wallets, eq(wallets.id, transactions.walletId)).innerJoin(profiles, eq(profiles.id, wallets.userId))');
   });
+
+  it("resolves expired active test cycles to completed status dynamically in dashboard queries and details", () => {
+    const crowdtestingSource = readFileSync(new URL("./crowdtesting.ts", import.meta.url), "utf8");
+    const routerSource = readFileSync(new URL("./routers.ts", import.meta.url), "utf8");
+
+    expect(crowdtestingSource).toContain('(c.status === "active" && c.endAt < nowTime) ? "completed"');
+    expect(routerSource).toContain('(rawCycle.status === "active" && rawCycle.endAt < new Date()) ? "completed"');
+    expect(routerSource).toContain('(c.status === "active" && c.endAt < nowTime) ? "completed"');
+  });
 });

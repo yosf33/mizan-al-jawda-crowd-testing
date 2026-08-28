@@ -1,0 +1,11 @@
+{
+  "memory": {
+    "autoIndex": true,
+    "defaultTokenBudget": 2000
+  },
+  "project": {
+    "id": "project.mizan-al-jawda-crowd-testing",
+    "name": "Mizan Al Jawda Crowd Testing"
+  },
+  "version": 5
+}
