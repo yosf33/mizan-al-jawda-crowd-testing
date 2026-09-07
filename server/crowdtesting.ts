@@ -74,41 +74,90 @@ export async function isActiveCycleTtl(userId: string, testCycleId: string) {
   return Boolean(assignment);
 }
 
+export async function testerOverviewData(userId: string) {
+  const db = getDb();
+  if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
+  const now = new Date();
+
+  const [profileRows, walletRows, cycles, applications, invitations, reportCountRows] = await Promise.all([
+    db.select().from(testerProfiles).where(eq(testerProfiles.userId, userId)).limit(1),
+    db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1),
+    db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, buildUrl: testCycles.buildUrl, endAt: testCycles.endAt, projectName: projects.name })
+      .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId))
+      .where(and(eq(testCycles.status, "active"), lte(testCycles.startAt, now), gte(testCycles.endAt, now))).orderBy(desc(testCycles.endAt)),
+    readV3OrFallback(() => db.select({ testCycleId: testCycleApplications.testCycleId, status: testCycleApplications.status })
+      .from(testCycleApplications).where(eq(testCycleApplications.testerId, userId)), [] as { testCycleId: string; status: "pending" | "accepted" | "rejected" }[]),
+    readV3OrFallback(() => db.select({ testCycleId: testCycleInvitations.testCycleId, status: testCycleInvitations.status })
+      .from(testCycleInvitations).where(eq(testCycleInvitations.testerId, userId)), [] as { testCycleId: string; status: "pending" | "applied" | "expired" }[]),
+    db.select({ count: sql<number>`count(*)::int` }).from(bugReports).where(eq(bugReports.testerId, userId)),
+  ]);
+
+  const applicationByCycle = new Map(applications.map(a => [a.testCycleId, a.status]));
+  const invitationByCycle = new Map(invitations.map(i => [i.testCycleId, i.status]));
+  const activeCycles = cycles.map(cycle => {
+    const applicationStatus = applicationByCycle.get(cycle.id) ?? null;
+    return { ...cycle, buildUrl: applicationStatus === "accepted" ? cycle.buildUrl : null, applicationStatus, invitationStatus: invitationByCycle.get(cycle.id) ?? null };
+  });
+
+  return {
+    kind: "tester" as const,
+    profile: profileRows[0] ?? null,
+    wallet: walletRows[0] ?? null,
+    activeCycles,
+    reportsCount: reportCountRows[0]?.count ?? 0,
+  };
+}
+
+export async function testerReportsData(userId: string) {
+  const db = getDb();
+  if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
+  const reports = await db.select().from(bugReports).where(eq(bugReports.testerId, userId)).orderBy(desc(bugReports.createdAt)).limit(30);
+  if (!reports.length) return [];
+  const [reportEvents, attachments] = await Promise.all([
+    readV3OrFallback(() => db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(r => r.id))).orderBy(bugReportEvents.createdAt), []),
+    db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, reports.map(r => r.id))).orderBy(desc(bugAttachments.createdAt)),
+  ]);
+  return projectReportsWithHistory(reports, reportEvents, attachments);
+}
+
+export async function testerWalletData(userId: string) {
+  const db = getDb();
+  if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  const [payoutHistory, transactionsHistory] = await Promise.all([
+    db.select().from(payoutRequests).where(eq(payoutRequests.testerId, userId)).orderBy(desc(payoutRequests.requestedAt)).limit(30),
+    wallet ? db.select().from(transactions).where(eq(transactions.walletId, wallet.id)).orderBy(desc(transactions.createdAt)).limit(50) : Promise.resolve([]),
+  ]);
+  return { availableBalance: Number(wallet?.availableBalance || 0), payoutHistory, transactionsHistory };
+}
+
+export async function testerDevicesData(userId: string) {
+  const db = getDb();
+  if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
+  return db.select().from(testerDevices).where(eq(testerDevices.testerId, userId));
+}
+
 export async function dashboardFor(role: string, userId: string) {
   const db = getDb();
   if (!db) throw new Error("قاعدة البيانات غير متاحة حالياً.");
 
   if (role === "tester") {
-    const [profile] = await db.select().from(testerProfiles).where(eq(testerProfiles.userId, userId)).limit(1);
-    const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
-    const devices = await db.select().from(testerDevices).where(eq(testerDevices.testerId, userId));
-    const now = new Date();
-    const cycles = await db.select({ id: testCycles.id, title: testCycles.title, scopeDescription: testCycles.scopeDescription, buildUrl: testCycles.buildUrl, endAt: testCycles.endAt, projectName: projects.name })
-      .from(testCycles).innerJoin(projects, eq(projects.id, testCycles.projectId))
-      .where(and(eq(testCycles.status, "active"), lte(testCycles.startAt, now), gte(testCycles.endAt, now))).orderBy(desc(testCycles.endAt));
-    const [applications, invitations] = await Promise.all([
-      readV3OrFallback(() => db.select({ testCycleId: testCycleApplications.testCycleId, status: testCycleApplications.status })
-        .from(testCycleApplications).where(eq(testCycleApplications.testerId, userId)), [] as { testCycleId: string; status: "pending" | "accepted" | "rejected" }[]),
-      readV3OrFallback(() => db.select({ testCycleId: testCycleInvitations.testCycleId, status: testCycleInvitations.status })
-        .from(testCycleInvitations).where(eq(testCycleInvitations.testerId, userId)), [] as { testCycleId: string; status: "pending" | "applied" | "expired" }[]),
+    const [overview, reports, walletData, devices] = await Promise.all([
+      testerOverviewData(userId),
+      testerReportsData(userId),
+      testerWalletData(userId),
+      testerDevicesData(userId),
     ]);
-    const applicationByCycle = new Map(applications.map(application => [application.testCycleId, application.status]));
-    const invitationByCycle = new Map(invitations.map(invitation => [invitation.testCycleId, invitation.status]));
-    const activeCycles = cycles.map(cycle => {
-      const applicationStatus = applicationByCycle.get(cycle.id) ?? null;
-      return {
-        ...cycle,
-        buildUrl: applicationStatus === "accepted" ? cycle.buildUrl : null,
-        applicationStatus,
-        invitationStatus: invitationByCycle.get(cycle.id) ?? null,
-      };
-    });
-    const reports = await db.select().from(bugReports).where(eq(bugReports.testerId, userId)).orderBy(desc(bugReports.createdAt)).limit(30);
-    const reportEvents = reports.length ? await readV3OrFallback(() => db.select().from(bugReportEvents).where(inArray(bugReportEvents.bugReportId, reports.map(report => report.id))).orderBy(bugReportEvents.createdAt), []) : [];
-    const attachments = reports.length ? await db.select({ id: bugAttachments.id, bugReportId: bugAttachments.bugReportId, originalName: bugAttachments.originalName, mimeType: bugAttachments.mimeType, sizeBytes: bugAttachments.sizeBytes }).from(bugAttachments).where(inArray(bugAttachments.bugReportId, reports.map(report => report.id))).orderBy(desc(bugAttachments.createdAt)) : [];
-    const payoutHistory = await db.select().from(payoutRequests).where(eq(payoutRequests.testerId, userId)).orderBy(desc(payoutRequests.requestedAt)).limit(30);
-    const transactionsHistory = wallet ? await db.select().from(transactions).where(eq(transactions.walletId, wallet.id)).orderBy(desc(transactions.createdAt)).limit(50) : [];
-    return { kind: "tester" as const, profile, wallet, devices, activeCycles, reports: projectReportsWithHistory(reports, reportEvents, attachments), payoutHistory, transactionsHistory };
+    return {
+      kind: "tester" as const,
+      profile: overview.profile,
+      wallet: overview.wallet,
+      devices,
+      activeCycles: overview.activeCycles,
+      reports,
+      payoutHistory: walletData.payoutHistory,
+      transactionsHistory: walletData.transactionsHistory,
+    };
   }
 
   if (role === "client") {

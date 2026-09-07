@@ -13,6 +13,7 @@ export const env = {
   // Supabase now issues server-only Secret API keys (`sb_secret_…`).
   // Accept the legacy service-role variable during controlled migrations.
   supabaseSecretKey: value("SUPABASE_SECRET_KEY") || value("SUPABASE_SERVICE_ROLE_KEY"),
+  supabaseJwtSecret: value("SUPABASE_JWT_SECRET"),
   publicAppUrl: value("PUBLIC_APP_URL"),
   resendApiKey: value("RESEND_API_KEY"),
   emailFrom: value("EMAIL_FROM"),
