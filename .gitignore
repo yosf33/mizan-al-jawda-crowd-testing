@@ -196,3 +196,5 @@ graphify-out/
 !.gitattributes
 .chaos-engine-owned-directory
 # CHAOSENGINE-RUNTIME:END
+.vercel
+.env*

@@ -1,0 +1,6 @@
+# Vercel ignore
+api/vercel-handler.js
+dist/
+node_modules/
+.git/
+.env*
