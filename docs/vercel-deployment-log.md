@@ -91,3 +91,16 @@ The staging Auth URL configuration was refreshed and confirms that the exact sta
 The refreshed `staging` branch Preview deployment for commit `4eaf0df` reached **Ready** in 54 seconds after the six branch-scoped staging variables were saved. Its stable branch URL is `https://mizan-al-jawda-crowd-testing-git-staging-youssef-soliman.vercel.app/`. On that deployment, `GET /`, `GET /sign-in`, `GET /api/health`, and `GET /api/health/database` each returned HTTP 200; the database readiness probe reported `database: ready`; and the unauthenticated `account.profile` tRPC request returned the expected HTTP 401 boundary. The Preview response also contained CSP, HSTS, `nosniff`, frame-denial, and referrer-policy headers, and the landing markup declares Arabic RTL. These checks establish a working isolated runtime path without using a user credential or reading data.
 
 The staging project began empty and received only the reviewed schema migrations, RLS/default-deny policies, indexes, and private evidence bucket. Its Supabase security advisor had no actionable findings, and the index follow-up removed the prior missing-foreign-key-index warning. Production was not queried or modified during the staging setup. An authenticated staging user journey and fixture-based role, evidence, financial-concurrency, direct-RLS, and restore tests remain intentional release-gate work; no staging test account or business fixture has been created in this setup step.
+
+## Tester Dashboard Performance Optimization & 13 Business Gap Fixes Staging Release
+
+In September 2026, the `staging` branch was updated with:
+1. Implementation of the 13 business gap fixes (auto-cycle expiration, test cycle applications, duplicate report triage, community manager notifications, and Arabic monetary validation).
+2. Tester Dashboard 5-phase performance optimization:
+   - Backend query decomposition into parallel lightweight endpoints (`testerOverviewData`, `testerReportsData`, `testerWalletData`, `testerDevicesData`).
+   - Local cryptographic JWT verification with `jose` using `SUPABASE_JWT_SECRET` and read-before-write profile updates.
+   - Batching network requests in `Workspace.tsx` to eliminate waterfall delays.
+   - TanStack Query cache tuning (`staleTime: 30_000`, `refetchOnWindowFocus: false`).
+   - Route-level lazy loading (`React.lazy`) producing an isolated ~220 KB Workspace chunk.
+3. Verification passed with 0 TypeScript errors, successful Vite client bundle and esbuild serverless function builds, and 18 passing Vitest test suites (75 passed tests).
+

@@ -5,7 +5,7 @@ import {
   bugAttachments, bugReportEvents, bugReports, cycleBountyRates, notifications, payoutRequests, profiles, reputationEvents,
   projects, testCycleApplications, testCycleInvitations, testCycleTtls, testerDevices, testerProfiles, testCycles, transactions, wallets,
 } from "../drizzle/schema";
-import { dashboardFor, isActiveCycleTtl, money, notify, projectReportsWithHistory, readV3OrFallback } from "./crowdtesting";
+import { dashboardFor, isActiveCycleTtl, money, notify, projectReportsWithHistory, readV3OrFallback, testerDevicesData, testerOverviewData, testerReportsData, testerWalletData } from "./crowdtesting";
 import { getDb } from "./db";
 import { storageGetSignedUrl, storagePut } from "./storage";
 import { protectedProcedure, publicProcedure, router } from "./trpc";
@@ -88,6 +88,10 @@ export const appRouter = router({
   }),
   workspace: router({ dashboard: protectedProcedure.query(({ ctx }) => dashboardFor(ctx.user.role, ctx.user.id)) }),
   tester: router({
+    overview: protectedProcedure.query(({ ctx }) => testerOverviewData(ctx.user.id)),
+    reportsData: protectedProcedure.query(({ ctx }) => testerReportsData(ctx.user.id)),
+    walletData: protectedProcedure.query(({ ctx }) => testerWalletData(ctx.user.id)),
+    devicesData: protectedProcedure.query(({ ctx }) => testerDevicesData(ctx.user.id)),
     addDevice: protectedProcedure.input(z.object({ deviceType: z.enum(["mobile", "desktop", "tablet"]), brandModel: z.string().min(2).max(180), osName: z.enum(["android", "ios", "windows", "macos", "linux"]), osVersion: z.string().min(1).max(60) })).mutation(async ({ ctx, input }) => {
       requireRole(ctx.user.role, ["tester"]);
       const db = dbOrFail();
