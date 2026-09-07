@@ -18,4 +18,6 @@ The production bundle completed successfully. The automated test suite passed th
    - Vite client production build: succeeded (generating isolated route chunks).
    - Esbuild server & Vercel Function handler builds: succeeded.
    - Vitest automated test suite: 18 test files passed (75 tests passed, 0 failures, 1 skipped).
+7. **Live Staging Deployment:** Deployed via Vercel CLI from Termux (`https://mizan-al-jawda-crowd-testing-e43gt28tl-youssef-soliman.vercel.app`). Verified `/api/health` (HTTP 200), `/api/health/database` (HTTP 200, `database: ready`), and root landing SPA (HTTP 200, Arabic RTL).
+
 

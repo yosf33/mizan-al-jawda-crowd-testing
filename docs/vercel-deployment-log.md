@@ -103,4 +103,10 @@ In September 2026, the `staging` branch was updated with:
    - TanStack Query cache tuning (`staleTime: 30_000`, `refetchOnWindowFocus: false`).
    - Route-level lazy loading (`React.lazy`) producing an isolated ~220 KB Workspace chunk.
 3. Verification passed with 0 TypeScript errors, successful Vite client bundle and esbuild serverless function builds, and 18 passing Vitest test suites (75 passed tests).
+4. **Vercel Preview Deployment & Verification:**
+   - Deployed from Termux using Vercel CLI (`npx vercel --yes`) to Preview URL: `https://mizan-al-jawda-crowd-testing-e43gt28tl-youssef-soliman.vercel.app`.
+   - `GET /api/health` returned HTTP 200 with `{"configured":true,"ok":true,"service":"mizan-al-jawda"}`.
+   - `GET /api/health/database` returned HTTP 200 with `{"configured":true,"database":"ready","ok":true,"service":"mizan-al-jawda"}`.
+   - Root SPA `GET /` returned HTTP 200 with Arabic RTL markup and configured Content Security Policy headers.
+
 
